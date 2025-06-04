@@ -1,0 +1,93 @@
+from peewee import *
+import bcrypt
+
+db = MySQLDatabase(
+    'school_management',
+    user='root',
+    password="",
+    host='localhost',
+    port=3306
+)
+
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+class User(BaseModel):
+    fullname = CharField()
+    user_name = CharField(unique=True)
+    job = CharField()
+    password = CharField()
+    is_admin = BooleanField(default=False)
+'''
+    @classmethod
+    def create_user(cls, fullname, user_name, job, password, is_admin=False):
+        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        return cls.create(
+            fullname=fullname,
+            user_name=user_name,
+            job=job,
+            password=hashed_password.decode(),
+            is_admin=is_admin
+        )
+
+    def verify_password(self, password):
+        return bcrypt.checkpw(password.encode(), self.password.encode())
+'''
+class Student(BaseModel):
+    student_id = CharField(unique=True)
+    name = CharField()
+    age = IntegerField()
+    grade = CharField()
+
+class Teacher(BaseModel):
+    teacher_id = CharField(unique=True)
+    name = CharField()
+    specialization = CharField()
+
+class Course(BaseModel):
+    course_id = CharField(unique=True)
+    name = CharField()    
+    teacher = ForeignKeyField(Teacher, backref='courses_teaching', null=True)
+
+class StudentCourse(BaseModel):
+    student = ForeignKeyField(Student, backref='enrollments')
+    course = ForeignKeyField(Course, backref='enrollments')
+    midterm_score = FloatField(null=True)
+    final_score = FloatField(null=True)
+    
+
+    def calculate_final_grade(self):
+        return (self.midterm_score * 0.4) + (self.final_score * 0.6)
+
+    class Meta:
+        indexes = (
+            (('student', 'course'), True),
+        )
+
+class Permissions(BaseModel):
+    user = ForeignKeyField(User, backref='permissions', on_update='CASCADE', on_delete='CASCADE')
+    users_tab = BooleanField()
+    teachers_tab = BooleanField()
+    courses_tab = BooleanField()
+    students_tab = BooleanField()
+    scores_tab = BooleanField()
+    student_score_tab = BooleanField()
+    permissions_tab = BooleanField()
+
+db.connect()
+db.create_tables([User, Student, Teacher, Course, StudentCourse, Permissions])
+'''
+def initialize_db():
+    try:
+        db.connect()
+        db.create_tables([User, Student, Teacher, Course, StudentCourse, Permissions], safe=True)
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    initialize_db()
+
+user = User.create_user("مصطفى بسيوني", "mostafa", "معلم", "0000")
+print(user.verify_password("0000"))  # يجب أن يعطي True
+'''
