@@ -1,29 +1,11 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 import sys
+from user_controller import UserManager  # استيراد وحدة التحكم للمستخدم
 from sch_management_db import User, Student, Teacher, Course, StudentCourse, Permissions # استيراد الجداول من Peewee
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class UserManager:
-    def __init__(self):
-        self.logged_user = None  # المستخدم الحالي بعد تسجيل الدخول
-
-    def login(self, username, password):
-                        
-        try:
-            user = User.get(User.user_name == username)            
-            if user.password == password:
-                self.logged_user = user
-                return True, user
-            else:
-                return False, "كلمة المرور غير صحيحة"
-        except User.DoesNotExist:
-            return False, "المستخدم غير موجود"
-
-    def get_permissions(self):
-        if not self.logged_user:
-            return []
-        return list(Permissions.select().where(Permissions.user == self.logged_user))
 
 
 class Main(QtWidgets.QMainWindow):
@@ -33,8 +15,9 @@ class Main(QtWidgets.QMainWindow):
         
         self.tabWidget.tabBar().setVisible(False)
         self.user_manager = UserManager()
-                
+        self.pushButton.clicked.connect(self.open_users_tab)        
         self.pushButton_8.clicked.connect(self.handle_login)
+        self.pushButton_10.clicked.connect(self.handle_user_creation)
     def handle_login(self):
         self.groupBox.setEnabled(True)
         self.pushButton.setEnabled(False)
@@ -75,6 +58,35 @@ class Main(QtWidgets.QMainWindow):
         else:
             QtWidgets.QMessageBox.warning(self, "فشل", result)        
 
+    def handle_user_creation(self):
+        fullname = self.lineEdit_4.text().strip()
+        username = self.lineEdit_6.text().strip()
+        password = self.lineEdit_7.text().strip()
+        job = self.lineEdit_5.text().strip()
+        is_admin = self.checkBox.isChecked()
+
+        if not fullname or not username or not password or not job:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
+            return
+
+        user = UserManager.create_user(fullname, username, password, job, is_admin)
+
+        if user:
+            QtWidgets.QMessageBox.information(self, "نجاح", "تم إنشاء المستخدم بنجاح.")
+            self.lineEdit_3.clear()
+            self.lineEdit_4.clear()
+            self.lineEdit_5.clear()
+            self.lineEdit_6.clear()
+            self.lineEdit_7.clear()
+            self.checkBox.setChecked(False)
+        else:
+            QtWidgets.QMessageBox.critical(self, "خطأ", "فشل في إنشاء المستخدم.")
+
+    def open_users_tab(self):
+        self.tabWidget.setCurrentIndex(1)
+    
+    
+        
 
 def main():
 

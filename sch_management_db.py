@@ -19,21 +19,7 @@ class User(BaseModel):
     job = CharField()
     password = CharField()
     is_admin = BooleanField(default=False)
-'''
-    @classmethod
-    def create_user(cls, fullname, user_name, job, password, is_admin=False):
-        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-        return cls.create(
-            fullname=fullname,
-            user_name=user_name,
-            job=job,
-            password=hashed_password.decode(),
-            is_admin=is_admin
-        )
-
-    def verify_password(self, password):
-        return bcrypt.checkpw(password.encode(), self.password.encode())
-'''
+    
 class Student(BaseModel):
     student_id = CharField(unique=True)
     name = CharField()
@@ -77,17 +63,9 @@ class Permissions(BaseModel):
 
 db.connect()
 db.create_tables([User, Student, Teacher, Course, StudentCourse, Permissions])
-'''
-def initialize_db():
-    try:
-        db.connect()
-        db.create_tables([User, Student, Teacher, Course, StudentCourse, Permissions], safe=True)
-    finally:
-        db.close()
+# Close the database connection when done
+db.close()
 
-if __name__ == "__main__":
-    initialize_db()
 
-user = User.create_user("مصطفى بسيوني", "mostafa", "معلم", "0000")
-print(user.verify_password("0000"))  # يجب أن يعطي True
-'''
+
+
