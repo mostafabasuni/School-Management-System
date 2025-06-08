@@ -469,22 +469,12 @@
       </column>
       <column>
        <property name="text">
-        <string>الرقم القومي</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>الموبايل</string>
+        <string>الوظيفة</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>اسم المستخدم</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>كلمة المرور</string>
        </property>
       </column>
       <column>

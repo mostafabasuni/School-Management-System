@@ -52,3 +52,27 @@ class UserManager:
     @staticmethod
     def get_all_users():
         return list(User.select())
+    
+    def update_user(self, user_id, fullname, job, username, is_admin):
+        try:
+            user = User.get_by_id(user_id)
+            user.fullname = fullname
+            user.job = job
+            user.user_name = username
+            user.is_admin = is_admin    
+            user.save()
+            return True, "تم تحديث بيانات المستخدم بنجاح"
+        except User.DoesNotExist:
+            return False, "المستخدم غير موجود"
+        except Exception as e:
+            return False, f"حدث خطأ أثناء التحديث: {str(e)}"
+
+    def delete_user(self, user_id):
+        try:
+            user = User.get_by_id(user_id)
+            user.delete_instance()
+            return True, "تم حذف المستخدم بنجاح"
+        except User.DoesNotExist:
+            return False, "المستخدم غير موجود"
+        except Exception as e:
+            return False, f"حدث خطأ أثناء الحذف: {str(e)}"
