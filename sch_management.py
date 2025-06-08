@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 import sys
 from user_controller import UserManager  # استيراد وحدة التحكم للمستخدم
+from teacher_controller import TeacherService  # استيراد خدمة المعلم
 from sch_management_db import User, Student, Teacher, Course, StudentCourse, Permissions # استيراد الجداول من Peewee
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -15,14 +16,20 @@ class Main(QtWidgets.QMainWindow):
         
         self.tabWidget.tabBar().setVisible(False)
         self.user_manager = UserManager()
+        self.teacher_manager = TeacherService()  # إنشاء مثيل من خدمة المعلم
         self.tableWidget.itemClicked.connect(self.user_table_select)
+        self.tableWidget_2.itemClicked.connect(self.teacher_table_select)
         self.pushButton.clicked.connect(self.open_users_tab)        
+        self.pushButton_2.clicked.connect(self.open_teachers_tab)
         self.pushButton_8.clicked.connect(self.handle_login)
         self.pushButton_9.clicked.connect(self.clear_user_form)
         self.pushButton_10.clicked.connect(self.handle_user_creation)
         self.pushButton_11.clicked.connect(self.handle_user_update)
         self.pushButton_12.clicked.connect(self.handle_user_delete)
+        self.pushButton_15.clicked.connect(self.handle_teacher_creation)
+        self.pushButton_16.clicked.connect(self.handle_teacher_update)
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
+        self.load_teachers()
     def load_users(self):     
         self.tableWidget.setRowCount(0)
         for row_index, user in enumerate(User.select()):
@@ -86,7 +93,7 @@ class Main(QtWidgets.QMainWindow):
             self.lineEdit_2.clear()
         else:
             QtWidgets.QMessageBox.warning(self, "فشل", result)        
-
+# =================== Users =========================
     def handle_user_creation(self):
         fullname = self.lineEdit_4.text().strip()
         username = self.lineEdit_6.text().strip()
@@ -161,7 +168,63 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_6.clear()
         self.lineEdit_7.clear()
         self.checkBox.setChecked(False)
+# =================== Users ends =========================
+# =================== Teachers =========================
+    def load_teachers(self):
+        self.tableWidget_2.setRowCount(0)
+        for row_index, teacher in enumerate(Teacher.select()):
+            self.tableWidget_2.insertRow(row_index)
+            self.tableWidget_2.setItem(row_index, 0, QtWidgets.QTableWidgetItem(str(teacher.id)))
+            self.tableWidget_2.setItem(row_index, 1, QtWidgets.QTableWidgetItem(str(teacher.teacher_id)))
+            self.tableWidget_2.setItem(row_index, 2, QtWidgets.QTableWidgetItem(teacher.name))
+            self.tableWidget_2.setItem(row_index, 3, QtWidgets.QTableWidgetItem(teacher.specialization))
+    def open_teachers_tab(self):
+        self.tabWidget.setCurrentIndex(2)
+    
+    def teacher_table_select(self):
+        selected_row = self.tableWidget_2.currentRow()
+        if selected_row == -1:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
+            return
+
+        id = int(self.tableWidget_2.item(selected_row, 0).text())
+        teacher = Teacher.get_by_id(id)
+        self.lineEdit_9.setText(teacher.teacher_id)
+        self.lineEdit_10.setText(teacher.name)
+        self.lineEdit_11.setText(teacher.specialization)
         
+    def handle_teacher_creation(self):
+        id = self.lineEdit_9.text().strip()
+        teacher_name = self.lineEdit_10.text().strip()
+        subject = self.lineEdit_11.text().strip()        
+        if not id or not teacher_name or not subject:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
+            return
+        teacher = TeacherService.create_teacher(id, teacher_name, subject)
+        
+        if teacher:
+            QtWidgets.QMessageBox.information(self, "نجاح", "تم إضافة المعلم بنجاح.")
+            self.lineEdit_9.clear()
+            self.lineEdit_10.clear()
+            self.lineEdit_11.clear()
+            self.load_teachers()
+
+    def handle_teacher_update(self):
+        selected_row = self.tableWidget_2.currentRow()
+        if selected_row == -1:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
+            return
+        id = int(self.tableWidget_2.item(selected_row, 0).text())
+        teacher_id = self.lineEdit_9.text().strip()
+        name = self.lineEdit_10.text().strip()
+        specialization = self.lineEdit_11.text().strip()
+        
+        success, message = self.teacher_manager.update_teacher(id, teacher_id, name, specialization)
+        if success:
+            QtWidgets.QMessageBox.information(self, "نجاح", message)
+            self.load_teachers()
+        else:
+            QtWidgets.QMessageBox.critical(self, "خطأ", message)
 def main():
 
     app = QtWidgets.QApplication(sys.argv)
@@ -171,3 +234,4 @@ def main():
     app.exec_()
 if __name__ == '__main__':
     main()
+    

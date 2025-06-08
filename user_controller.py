@@ -1,5 +1,5 @@
 
-from sch_management_db import User, Permissions # استيراد الجداول من Peewee
+from sch_management_db import User, Teacher, Permissions # استيراد الجداول من Peewee
 import bcrypt
 
 class UserManager:
@@ -76,3 +76,4 @@ class UserManager:
             return False, "المستخدم غير موجود"
         except Exception as e:
             return False, f"حدث خطأ أثناء الحذف: {str(e)}"
+        

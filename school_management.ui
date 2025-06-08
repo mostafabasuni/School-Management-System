@@ -662,7 +662,7 @@
       </widget>
       <widget class="QLineEdit" name="lineEdit_9">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -739,6 +739,11 @@
         <bold>true</bold>
        </font>
       </property>
+      <column>
+       <property name="text">
+        <string>م</string>
+       </property>
+      </column>
       <column>
        <property name="text">
         <string>رقم المدرس</string>
@@ -2186,6 +2191,90 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>pushButton_8</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>lineEdit_2</tabstop>
+  <tabstop>lineEdit_8</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>lineEdit_7</tabstop>
+  <tabstop>pushButton_12</tabstop>
+  <tabstop>pushButton_10</tabstop>
+  <tabstop>pushButton_11</tabstop>
+  <tabstop>pushButton_9</tabstop>
+  <tabstop>pushButton_13</tabstop>
+  <tabstop>tableWidget</tabstop>
+  <tabstop>pushButton_14</tabstop>
+  <tabstop>pushButton_15</tabstop>
+  <tabstop>pushButton_16</tabstop>
+  <tabstop>pushButton_17</tabstop>
+  <tabstop>lineEdit_9</tabstop>
+  <tabstop>lineEdit_10</tabstop>
+  <tabstop>lineEdit_11</tabstop>
+  <tabstop>pushButton_18</tabstop>
+  <tabstop>lineEdit_12</tabstop>
+  <tabstop>tableWidget_2</tabstop>
+  <tabstop>pushButton_19</tabstop>
+  <tabstop>pushButton_20</tabstop>
+  <tabstop>pushButton_21</tabstop>
+  <tabstop>pushButton_22</tabstop>
+  <tabstop>pushButton_23</tabstop>
+  <tabstop>lineEdit_13</tabstop>
+  <tabstop>lineEdit_14</tabstop>
+  <tabstop>lineEdit_15</tabstop>
+  <tabstop>tableWidget_3</tabstop>
+  <tabstop>lineEdit_16</tabstop>
+  <tabstop>tableWidget_4</tabstop>
+  <tabstop>pushButton_24</tabstop>
+  <tabstop>pushButton_25</tabstop>
+  <tabstop>pushButton_26</tabstop>
+  <tabstop>pushButton_27</tabstop>
+  <tabstop>lineEdit_17</tabstop>
+  <tabstop>lineEdit_18</tabstop>
+  <tabstop>lineEdit_19</tabstop>
+  <tabstop>lineEdit_21</tabstop>
+  <tabstop>pushButton_28</tabstop>
+  <tabstop>lineEdit_20</tabstop>
+  <tabstop>tableWidget_5</tabstop>
+  <tabstop>pushButton_30</tabstop>
+  <tabstop>pushButton_31</tabstop>
+  <tabstop>pushButton_32</tabstop>
+  <tabstop>pushButton_33</tabstop>
+  <tabstop>pushButton_34</tabstop>
+  <tabstop>lineEdit_23</tabstop>
+  <tabstop>lineEdit_25</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>lineEdit_26</tabstop>
+  <tabstop>tableWidget_6</tabstop>
+  <tabstop>pushButton_37</tabstop>
+  <tabstop>lineEdit_24</tabstop>
+  <tabstop>lineEdit_28</tabstop>
+  <tabstop>comboBox_2</tabstop>
+  <tabstop>lineEdit_29</tabstop>
+  <tabstop>pushButton_29</tabstop>
+  <tabstop>checkBox_15</tabstop>
+  <tabstop>checkBox_16</tabstop>
+  <tabstop>checkBox_18</tabstop>
+  <tabstop>checkBox_25</tabstop>
+  <tabstop>checkBox_26</tabstop>
+  <tabstop>checkBox_27</tabstop>
+  <tabstop>checkBox_28</tabstop>
+  <tabstop>pushButton_35</tabstop>
+  <tabstop>comboBox_3</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>pushButton_2</tabstop>
+  <tabstop>pushButton_3</tabstop>
+  <tabstop>pushButton_4</tabstop>
+  <tabstop>pushButton_5</tabstop>
+  <tabstop>pushButton_6</tabstop>
+  <tabstop>pushButton_36</tabstop>
+  <tabstop>pushButton_7</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
