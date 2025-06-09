@@ -6,9 +6,10 @@ class TeacherService:
 
     @staticmethod
     def create_teacher(id, name, subject):
-        try:
-            teacher = Teacher.create(teacher_id=id, name=name, specialization=subject)
-            return teacher
+        try:            
+            return {Teacher.create(teacher_id=id, 
+                            name=name, 
+                            specialization=subject)}
         except Exception as e:
             print(f"Error creating teacher: {e}")
             return None
@@ -26,3 +27,12 @@ class TeacherService:
         except Exception as e:
             return False, f"حدث خطأ أثناء التحديث: {str(e)}"
 
+    def delete_teacher(self, id):
+        try:
+            teacher = Teacher.get_by_id(id)
+            teacher.delete_instance()
+            return True, "تم حذف المدرس بنجاح"
+        except Teacher.DoesNotExist:
+            return False, "المدرس غير موجود"
+        except Exception as e:
+            return False, f"حدث خطأ أثناء الحذف: {str(e)}"

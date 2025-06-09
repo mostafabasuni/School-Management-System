@@ -28,6 +28,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_12.clicked.connect(self.handle_user_delete)
         self.pushButton_15.clicked.connect(self.handle_teacher_creation)
         self.pushButton_16.clicked.connect(self.handle_teacher_update)
+        self.pushButton_17.clicked.connect(self.handle_teacher_delete)
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
         self.load_teachers()
     def load_users(self):     
@@ -48,7 +49,7 @@ class Main(QtWidgets.QMainWindow):
 
         user_id = int(self.tableWidget.item(selected_row, 0).text())
         user = User.get_by_id(user_id)
-        self.lineEdit_3.setText(str(user.id))
+        self.lineEdit_3.setText(str(user.id_))
         self.lineEdit_4.setText(user.fullname)        
         self.lineEdit_5.setText(user.job)
         self.lineEdit_6.setText(user.user_name)
@@ -187,22 +188,20 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
             return
 
-        id = int(self.tableWidget_2.item(selected_row, 0).text())
-        teacher = Teacher.get_by_id(id)
+        id_ = int(self.tableWidget_2.item(selected_row, 0).text())
+        teacher = Teacher.get_by_id(id_)
         self.lineEdit_9.setText(teacher.teacher_id)
         self.lineEdit_10.setText(teacher.name)
         self.lineEdit_11.setText(teacher.specialization)
         
     def handle_teacher_creation(self):
-        id = self.lineEdit_9.text().strip()
+        id_ = self.lineEdit_9.text().strip()
         teacher_name = self.lineEdit_10.text().strip()
         subject = self.lineEdit_11.text().strip()        
-        if not id or not teacher_name or not subject:
+        if not id_ or not teacher_name or not subject:
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
-            return
-        teacher = TeacherService.create_teacher(id, teacher_name, subject)
-        
-        if teacher:
+            return        
+        if TeacherService.create_teacher(id_, teacher_name, subject):
             QtWidgets.QMessageBox.information(self, "نجاح", "تم إضافة المعلم بنجاح.")
             self.lineEdit_9.clear()
             self.lineEdit_10.clear()
@@ -214,17 +213,43 @@ class Main(QtWidgets.QMainWindow):
         if selected_row == -1:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
             return
-        id = int(self.tableWidget_2.item(selected_row, 0).text())
+        id_ = int(self.tableWidget_2.item(selected_row, 0).text())
         teacher_id = self.lineEdit_9.text().strip()
         name = self.lineEdit_10.text().strip()
         specialization = self.lineEdit_11.text().strip()
         
-        success, message = self.teacher_manager.update_teacher(id, teacher_id, name, specialization)
+        success, message = self.teacher_manager.update_teacher(id_, teacher_id, name, specialization)
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.load_teachers()
         else:
             QtWidgets.QMessageBox.critical(self, "خطأ", message)
+    def handle_teacher_delete(self):
+        selected_row = self.tableWidget_2.currentRow()
+        if selected_row == -1:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
+            return
+        id_ = int(self.tableWidget_2.item(selected_row, 0).text())
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "تأكيد الحذف",
+            "هل أنت متأكد من حذف هذا المعلم؟",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+        )
+    
+        if reply == QtWidgets.QMessageBox.Yes:
+            success, message = self.teacher_manager.delete_teacher(id_)
+            if success:
+                QtWidgets.QMessageBox.information(self, "نجاح", message)
+                self.load_teachers()
+                self.clear_teacher_form()
+            else:
+                QtWidgets.QMessageBox.warning(self, "خطأ", message)
+    def clear_teacher_form(self):
+        self.lineEdit_9.clear()
+        self.lineEdit_10.clear()
+        self.lineEdit_11.clear()
+        
 def main():
 
     app = QtWidgets.QApplication(sys.argv)
