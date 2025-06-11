@@ -1,12 +1,11 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 import sys
+from grade_controller import GradeService  # استيراد وحدة التحكم للصفوف 
 from user_controller import UserManager  # استيراد وحدة التحكم للمستخدم
 from teacher_controller import TeacherService  # استيراد خدمة المعلم
 from sch_management_db import User, Student, Teacher, Course, StudentCourse, Permissions # استيراد الجداول من Peewee
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
 
 
 class Main(QtWidgets.QMainWindow):
@@ -17,18 +16,22 @@ class Main(QtWidgets.QMainWindow):
         self.tabWidget.tabBar().setVisible(False)
         self.user_manager = UserManager()
         self.teacher_manager = TeacherService()  # إنشاء مثيل من خدمة المعلم
+        self.grade_manager = GradeService()  # إنشاء مثيل من مدير الصفوف
         self.tableWidget.itemClicked.connect(self.user_table_select)
         self.tableWidget_2.itemClicked.connect(self.teacher_table_select)
         self.pushButton.clicked.connect(self.open_users_tab)        
         self.pushButton_2.clicked.connect(self.open_teachers_tab)
+        self.pushButton_3.clicked.connect(self.open_courses_tab)
         self.pushButton_8.clicked.connect(self.handle_login)
         self.pushButton_9.clicked.connect(self.clear_user_form)
         self.pushButton_10.clicked.connect(self.handle_user_creation)
         self.pushButton_11.clicked.connect(self.handle_user_update)
         self.pushButton_12.clicked.connect(self.handle_user_delete)
+        self.pushButton_14.clicked.connect(self.clear_teacher_form)
         self.pushButton_15.clicked.connect(self.handle_teacher_creation)
         self.pushButton_16.clicked.connect(self.handle_teacher_update)
         self.pushButton_17.clicked.connect(self.handle_teacher_delete)
+        self.pushButton_51.clicked.connect(self.handle_grade_creation)
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
         self.load_teachers()
     def load_users(self):     
@@ -49,7 +52,7 @@ class Main(QtWidgets.QMainWindow):
 
         user_id = int(self.tableWidget.item(selected_row, 0).text())
         user = User.get_by_id(user_id)
-        self.lineEdit_3.setText(str(user.id_))
+        self.lineEdit_3.setText(str(user.id))
         self.lineEdit_4.setText(user.fullname)        
         self.lineEdit_5.setText(user.job)
         self.lineEdit_6.setText(user.user_name)
@@ -249,6 +252,53 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_9.clear()
         self.lineEdit_10.clear()
         self.lineEdit_11.clear()
+# =================== Teachers Ends =========================
+# =================== Grades =========================
+    def open_grades_tab(self):
+        self.tabWidget.setCurrentIndex(4)
+        
+    def handle_grade_creation(self):
+        grade_id = self.lineEdit_44.text().strip()
+        grade_name = self.lineEdit_48.text().strip()
+        level = self.lineEdit_47.text().strip()
+        section = self.lineEdit_46.text().strip()
+        
+        if not grade_id or not grade_name or not level or not section:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
+            return
+        
+        # هنا يمكنك إضافة منطق إنشاء الدرجات
+    
+    
+    def handle_grade_update(self):
+        # هنا يمكنك إضافة منطق تحديث الدرجات
+        pass
+    
+    def handle_grade_delete(self):
+        # هنا يمكنك إضافة منطق حذف الدرجات
+        pass    
+        
+# =================== Courses =========================
+    def open_courses_tab(self):
+        self.tabWidget.setCurrentIndex(3)
+        
+    def handle_course_creation(self):
+        course_id = self.lineEdit_14.text().strip()
+        course_name = self.lineEdit_15.text().strip()
+        course_teacher = self.comboBox_7.currentText().strip()
+        course_grade = self.comboBox_8.currentText().strip()        
+        level = self.lineEdit_27.text().strip()
+        section = self.lineEdit_22.text().strip()
+        
+        
+        
+    def handle_course_update(self):
+        # هنا يمكنك إضافة منطق تحديث الدورات
+        pass
+    def handle_course_delete(self):
+        # هنا يمكنك إضافة منطق حذف الدورات
+        pass
+        
         
 def main():
 

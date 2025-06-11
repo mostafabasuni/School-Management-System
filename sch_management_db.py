@@ -31,11 +31,18 @@ class Teacher(BaseModel):
     name = CharField()
     specialization = CharField()
 
+class Grade(BaseModel):
+    grade_id = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
+    name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
+    level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
+    section = CharField(null=True)     # الفصل (أ، ب، ج...)
+
 class Course(BaseModel):
     course_id = CharField(unique=True)
-    name = CharField()    
+    name = CharField()
+    grade = ForeignKeyField(Grade, backref='courses', on_delete='CASCADE')
     teacher = ForeignKeyField(Teacher, backref='courses_teaching', null=True)
-
+    
 class StudentCourse(BaseModel):
     student = ForeignKeyField(Student, backref='enrollments')
     course = ForeignKeyField(Course, backref='enrollments')
@@ -56,13 +63,14 @@ class Permissions(BaseModel):
     users_tab = BooleanField()
     teachers_tab = BooleanField()
     courses_tab = BooleanField()
+    grades_tab = BooleanField()
     students_tab = BooleanField()
     scores_tab = BooleanField()
     student_score_tab = BooleanField()
     permissions_tab = BooleanField()
 
 db.connect()
-db.create_tables([User, Student, Teacher, Course, StudentCourse, Permissions])
+db.create_tables([User, Student, Teacher, Grade, Course, StudentCourse, Permissions])
 # Close the database connection when done
 db.close()
 
