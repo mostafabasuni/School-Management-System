@@ -7,12 +7,14 @@ class GradeService:
     
     def create_grade(self, grade_id, name, level, section):
         try:
-            return Grade.create(grade_id=grade_id, name=name, level=level, section=section)
+            return {Grade.create(grade_id=grade_id,
+                    name=name,
+                    level=level,
+                    section=section)}
         except Exception as e:
-            print(f"Error creating grade: {e}")
-            return None
+            return False, f"خطأ في إنشاء المادة: {str(e)}"
 
-    def update_grade(self, id, grade_id, name, level=None, section=None):
+    def update_grade(self, id, grade_id, name, level, section):
         try:
             grade = Grade.get(Grade.id == id)
             grade.grade_id = grade_id

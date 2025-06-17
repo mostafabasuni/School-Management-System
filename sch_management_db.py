@@ -1,4 +1,5 @@
 from peewee import *
+import datetime
 import bcrypt
 
 db = MySQLDatabase(
@@ -19,23 +20,24 @@ class User(BaseModel):
     job = CharField()
     password = CharField()
     is_admin = BooleanField(default=False)
-    
-class Student(BaseModel):
-    student_id = CharField(unique=True)
-    name = CharField()
-    age = IntegerField()
-    grade = CharField()
-
-class Teacher(BaseModel):
-    teacher_id = CharField(unique=True)
-    name = CharField()
-    specialization = CharField()
 
 class Grade(BaseModel):
     grade_id = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
     name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
     section = CharField(null=True)     # الفصل (أ، ب، ج...)
+    
+class Student(BaseModel):
+    student_id = CharField(unique=True)
+    name = CharField()
+    age = IntegerField()
+    grade = ForeignKeyField(Grade, backref='students')
+    registration_date = DateField(default=datetime.date.today)
+
+class Teacher(BaseModel):
+    teacher_id = CharField(unique=True)
+    name = CharField()
+    specialization = CharField()
 
 class Course(BaseModel):
     course_id = CharField(unique=True)

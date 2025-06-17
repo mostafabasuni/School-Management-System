@@ -943,27 +943,9 @@
         <string>مدرس المادة</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_13">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>267</x>
-         <y>130</y>
-         <width>201</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
       <widget class="QLineEdit" name="lineEdit_14">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1012,42 +994,6 @@
         <string>الصف</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_22">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>21</x>
-         <y>40</y>
-         <width>129</width>
-         <height>30</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_27">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>21</x>
-         <y>86</y>
-         <width>129</width>
-         <height>30</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_33">
        <property name="geometry">
         <rect>
@@ -1066,24 +1012,6 @@
         <string>المرحلة</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_30">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>21</x>
-         <y>130</y>
-         <width>129</width>
-         <height>30</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_34">
        <property name="geometry">
         <rect>
@@ -1100,6 +1028,52 @@
        </property>
        <property name="text">
         <string>الفصل الدراسي</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_7">
+       <property name="geometry">
+        <rect>
+         <x>258</x>
+         <y>130</y>
+         <width>211</width>
+         <height>28</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_8">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>130</y>
+         <width>131</width>
+         <height>28</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_9">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>86</y>
+         <width>131</width>
+         <height>28</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_10">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>131</width>
+         <height>28</height>
+        </rect>
        </property>
       </widget>
      </widget>
@@ -1134,6 +1108,21 @@
       <column>
        <property name="text">
         <string>اسم المادة</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الصف</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>المرحلة</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الفصل الدراسي</string>
        </property>
       </column>
       <column>
@@ -2196,6 +2185,11 @@
         </property>
         <column>
          <property name="text">
+          <string>رقم الصف</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>الفصل الدراسي</string>
          </property>
          <property name="font">
@@ -2212,12 +2206,12 @@
         </column>
         <column>
          <property name="text">
-          <string>مدرس المادة</string>
+          <string>الصف</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>الصف</string>
+          <string>رمز الصف</string>
          </property>
         </column>
        </widget>
@@ -3363,10 +3357,10 @@
      <widget class="QGroupBox" name="groupBox_11">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>80</x>
         <y>34</y>
-        <width>571</width>
-        <height>181</height>
+        <width>661</width>
+        <height>171</height>
        </rect>
       </property>
       <property name="title">
@@ -3375,7 +3369,7 @@
       <widget class="QLabel" name="label_19">
        <property name="geometry">
         <rect>
-         <x>470</x>
+         <x>570</x>
          <y>52</y>
          <width>80</width>
          <height>24</height>
@@ -3393,7 +3387,7 @@
       <widget class="QLabel" name="label_22">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>380</x>
          <y>52</y>
          <width>44</width>
          <height>24</height>
@@ -3411,8 +3405,8 @@
       <widget class="QLabel" name="label_23">
        <property name="geometry">
         <rect>
-         <x>470</x>
-         <y>112</y>
+         <x>109</x>
+         <y>52</y>
          <width>39</width>
          <height>24</height>
         </rect>
@@ -3426,31 +3420,13 @@
         <string>العمر</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_17">
+      <widget class="QLineEdit" name="lineEdit_18">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
-         <x>350</x>
-         <y>110</y>
-         <width>111</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_18">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>350</x>
+         <x>450</x>
          <y>50</y>
          <width>111</width>
          <height>28</height>
@@ -3465,27 +3441,9 @@
       <widget class="QLineEdit" name="lineEdit_19">
        <property name="geometry">
         <rect>
-         <x>40</x>
+         <x>190</x>
          <y>50</y>
-         <width>201</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_21">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>110</y>
-         <width>101</width>
+         <width>181</width>
          <height>28</height>
         </rect>
        </property>
@@ -3498,7 +3456,7 @@
       <widget class="QLabel" name="label_24">
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>612</x>
          <y>112</y>
          <width>43</width>
          <height>24</height>
@@ -3513,12 +3471,101 @@
         <string>الصف</string>
        </property>
       </widget>
+      <widget class="QLineEdit" name="lineEdit_22">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>110</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_44">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>112</y>
+         <width>51</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>المرحلة</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_45">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>110</y>
+         <width>101</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>تاريخ التسجيل</string>
+       </property>
+      </widget>
+      <widget class="QDateEdit" name="dateEdit">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>110</y>
+         <width>121</width>
+         <height>28</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spinBox">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>52</y>
+         <width>61</width>
+         <height>28</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_11">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>110</y>
+         <width>151</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_28">
       <property name="geometry">
        <rect>
         <x>470</x>
-        <y>230</y>
+        <y>225</y>
         <width>75</width>
         <height>32</height>
        </rect>
@@ -3536,7 +3583,7 @@
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>230</y>
+        <y>225</y>
         <width>201</width>
         <height>29</height>
        </rect>
@@ -4439,7 +4486,6 @@
   <tabstop>pushButton_21</tabstop>
   <tabstop>pushButton_22</tabstop>
   <tabstop>pushButton_23</tabstop>
-  <tabstop>lineEdit_13</tabstop>
   <tabstop>lineEdit_14</tabstop>
   <tabstop>lineEdit_15</tabstop>
   <tabstop>tableWidget_3</tabstop>
@@ -4449,10 +4495,8 @@
   <tabstop>pushButton_25</tabstop>
   <tabstop>pushButton_26</tabstop>
   <tabstop>pushButton_27</tabstop>
-  <tabstop>lineEdit_17</tabstop>
   <tabstop>lineEdit_18</tabstop>
   <tabstop>lineEdit_19</tabstop>
-  <tabstop>lineEdit_21</tabstop>
   <tabstop>pushButton_28</tabstop>
   <tabstop>lineEdit_20</tabstop>
   <tabstop>tableWidget_5</tabstop>
