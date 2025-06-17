@@ -3257,12 +3257,22 @@
       </column>
       <column>
        <property name="text">
+        <string>العمر</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>الصف</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>العمر</string>
+        <string>المرحلة</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>تاريخ التسجيل</string>
        </property>
       </column>
      </widget>
@@ -3471,24 +3481,6 @@
         <string>الصف</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_22">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>280</x>
-         <y>110</y>
-         <width>101</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_44">
        <property name="geometry">
         <rect>
@@ -3551,6 +3543,21 @@
          <x>450</x>
          <y>110</y>
          <width>151</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_12">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>110</y>
+         <width>111</width>
          <height>28</height>
         </rect>
        </property>

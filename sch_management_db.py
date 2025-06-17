@@ -22,6 +22,7 @@ class User(BaseModel):
     is_admin = BooleanField(default=False)
 
 class Grade(BaseModel):
+    id = AutoField(primary_key=True)  # هذا الحقل ضروري
     grade_id = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
     name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
@@ -31,7 +32,7 @@ class Student(BaseModel):
     student_id = CharField(unique=True)
     name = CharField()
     age = IntegerField()
-    grade = ForeignKeyField(Grade, backref='students')
+    grade = ForeignKeyField(Grade, field=Grade.id, backref='students')  # تحديد الحقل المرتبط صراحةً
     registration_date = DateField(default=datetime.date.today)
 
 class Teacher(BaseModel):
@@ -74,6 +75,12 @@ class Permissions(BaseModel):
 db.connect()
 db.create_tables([User, Student, Teacher, Grade, Course, StudentCourse, Permissions])
 # Close the database connection when done
+'''student = Student()
+student.student_id = "ST1Prime1"
+student.name = "Ahmed"
+student.age = 10    
+student.grade = Grade.get(Grade.grade_id == "PRIM-1")  # Assuming "PRIM-1" is a valid grade_id
+student.registration_date = datetime.date.today()'''
 db.close()
 
 

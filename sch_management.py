@@ -16,7 +16,7 @@ class Main(QtWidgets.QMainWindow):
         super(Main, self).__init__()
         uic.loadUi('school_management.ui', self)  # تحميل ملف التصميم
         
-        self.tabWidget.tabBar().setVisible(False)
+        #self.tabWidget.tabBar().setVisible(False)
         self.user_manager = UserManager()
         self.teacher_manager = TeacherService()  # إنشاء مثيل من خدمة المعلم
         self.grade_manager = GradeService()  # إنشاء مثيل من مدير الصفوف
@@ -25,7 +25,7 @@ class Main(QtWidgets.QMainWindow):
         
         self.setup_courses_tab()
         self.setup_student_tab()  # إعدادات تبويب الطلاب        
-        #self.load_students()
+        self.load_students()
         self.load_courses()
         
         self.tableWidget.itemClicked.connect(self.user_table_select)
@@ -49,6 +49,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_21.clicked.connect(self.handle_course_creation)
         self.pushButton_22.clicked.connect(self.handle_course_update)
         self.pushButton_23.clicked.connect(self.handle_course_delete)
+        self.pushButton_25.clicked.connect(self.handle_student_registration)
         self.pushButton_50.clicked.connect(self.clear_grade_form)
         self.pushButton_51.clicked.connect(self.handle_grade_creation)
         self.pushButton_52.clicked.connect(self.handle_grade_update)
@@ -562,47 +563,64 @@ class Main(QtWidgets.QMainWindow):
     
     def handle_student_registration(self):
         try:
-            student_id = self.lineEdit_16.text().strip()
-            name = self.lineEdit_17.text().strip()
+            student_id = self.lineEdit_18.text().strip()
+            name = self.lineEdit_19.text().strip()
             age = self.spinBox.value()
-            grade_id = self.comboBox_11.currentData()  # يجب ربط Combobox بgrade_id
+            grade_name = self.comboBox_11.currentText()
+            level = self.comboBox_12.currentText()
+            reg_date = self.dateEdit.date().toPyDate()
 
-            if not all([student_id, name, grade_id]):
+            # الحصول على ID الصف بدلاً من الكائن
+            grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level)
+            print(grade.id)
+            if not grade:
+                QtWidgets.QMessageBox.warning(self, "خطأ", "الصف المحدد غير موجود")
+                return
+
+            if not all([student_id, name]):
                 QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى تعبئة جميع الحقول الإجبارية")
                 return
 
-            success, message = self.student_service.register_student(
+            success, message = self.student_manager.register_student(
                 student_id=student_id,
                 name=name,
                 age=age,
-                grade_id=grade_id
+                grade_id=grade.id,  # إرسال ID الصف فقط
+                registration_date=reg_date
             )
 
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
                 self.load_students()
-                self.clear_student_form()
+                #self.clear_student_form()
             else:
                 QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
-
+            
     def setup_student_tab(self):
+                # تحميل الصفوف في Combobox
+        grades = Grade.select(fn.DISTINCT(Grade.name)).where(Grade.name.is_null(False))
         self.comboBox_11.clear()
-        for grade in Grade.select():
-            display_text = f"{grade.name} ({grade.grade_id})"  # مثال: "الصف الأول الابتدائي (prime-1)"
-            self.comboBox_11.addItem(display_text, grade.grade_id)
-    
+        for grade in grades: #Grade.select():            
+            self.comboBox_11.addItem(grade.name, grade.grade_id)
+        
+        levels = Grade.select(fn.DISTINCT(Grade.level)).where(Grade.level.is_null(False))
+        self.comboBox_12.clear()
+        for grade in levels:
+            self.comboBox_12.addItem(grade.level)
     def load_students(self):
         self.tableWidget_4.setRowCount(0)
         for row, student in enumerate(Student.select()):
+        
             self.tableWidget_4.insertRow(row)
             self.tableWidget_4.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_id))
             self.tableWidget_4.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
             self.tableWidget_4.setItem(row, 2, QtWidgets.QTableWidgetItem(str(student.age)))
             self.tableWidget_4.setItem(row, 3, QtWidgets.QTableWidgetItem(student.grade.name))
-            self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.grade_id))
+            self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.level))
+            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
             
 def main():
 
