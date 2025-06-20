@@ -2015,7 +2015,7 @@
           <x>240</x>
           <y>44</y>
           <width>491</width>
-          <height>141</height>
+          <height>171</height>
          </rect>
         </property>
         <property name="title">
@@ -2025,7 +2025,7 @@
          <property name="geometry">
           <rect>
            <x>363</x>
-           <y>90</y>
+           <y>130</y>
            <width>74</width>
            <height>24</height>
           </rect>
@@ -2046,7 +2046,7 @@
          <property name="geometry">
           <rect>
            <x>248</x>
-           <y>86</y>
+           <y>126</y>
            <width>111</width>
            <height>28</height>
           </rect>
@@ -2061,7 +2061,7 @@
          <property name="geometry">
           <rect>
            <x>160</x>
-           <y>90</y>
+           <y>130</y>
            <width>43</width>
            <height>24</height>
           </rect>
@@ -2082,7 +2082,7 @@
          <property name="geometry">
           <rect>
            <x>249</x>
-           <y>40</y>
+           <y>80</y>
            <width>111</width>
            <height>30</height>
           </rect>
@@ -2100,7 +2100,7 @@
          <property name="geometry">
           <rect>
            <x>21</x>
-           <y>44</y>
+           <y>84</y>
            <width>129</width>
            <height>30</height>
           </rect>
@@ -2115,7 +2115,7 @@
          <property name="geometry">
           <rect>
            <x>160</x>
-           <y>46</y>
+           <y>86</y>
            <width>51</width>
            <height>24</height>
           </rect>
@@ -2136,7 +2136,7 @@
          <property name="geometry">
           <rect>
            <x>21</x>
-           <y>88</y>
+           <y>128</y>
            <width>129</width>
            <height>30</height>
           </rect>
@@ -2151,7 +2151,7 @@
          <property name="geometry">
           <rect>
            <x>370</x>
-           <y>44</y>
+           <y>84</y>
            <width>111</width>
            <height>24</height>
           </rect>
@@ -2163,6 +2163,42 @@
          </property>
          <property name="text">
           <string>الفصل الدراسي</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="lineEdit_61">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>30</y>
+           <width>111</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_63">
+         <property name="geometry">
+          <rect>
+           <x>241</x>
+           <y>34</y>
+           <width>111</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>العام الدراسي</string>
          </property>
         </widget>
        </widget>
@@ -3945,10 +3981,10 @@
         </rect>
        </property>
        <property name="editable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="currentText">
-        <string>2024-2025</string>
+        <string/>
        </property>
        <property name="currentIndex">
         <number>-1</number>

@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 from peewee import fn
+from peewee import DoesNotExist
 import sys
 from grade_controller import GradeService  # استيراد وحدة التحكم للصفوف 
 from user_controller import UserManager  # استيراد وحدة التحكم للمستخدم
@@ -29,7 +30,7 @@ class Main(QtWidgets.QMainWindow):
         self.load_students()
         self.load_courses()
         
-        self.radioButton.toggled.connect(self.load_scores_for_term)
+        self.radioButton.clicked.connect(self.load_scores_for_term)
         self.radioButton_2.toggled.connect(self.load_scores_for_term)
         self.comboBox_16.currentIndexChanged.connect(self.load_scores_for_term)
         
@@ -433,6 +434,11 @@ class Main(QtWidgets.QMainWindow):
 
     def setup_courses_tab(self):
     # تحميل المدرسين في Combobox
+        self.comboBox_16.clear()
+        academic_years = Grade.select(fn.DISTINCT(Grade.academic_year)).where(Grade.academic_year.is_null(False))
+        for year in academic_years:
+            self.comboBox_16.addItem(year.academic_year)
+        
         self.comboBox_7.clear()
         for teacher in Teacher.select():            
             self.comboBox_7.addItem(teacher.name, teacher.teacher_id)
@@ -757,7 +763,7 @@ class Main(QtWidgets.QMainWindow):
         try:
             # جلب البيانات من الواجهة
             course = self.comboBox.currentText()
-            term_type = "midterm" if self.radioButton.isChecked() else "final"  # تحديد نوع الترم
+            term_type = "midterm_score" if self.radioButton.isChecked() else "final_score"  # تحديد نوع الترم
             academic_year = self.comboBox_16.currentText()  # يجب إضافة Combobox للسنة
             
             grade = self.comboBox_13.currentText()
@@ -776,7 +782,8 @@ class Main(QtWidgets.QMainWindow):
             for row in range(self.tableWidget_5.rowCount()):
                 student_id = self.tableWidget_5.item(row, 0).text()
                 student_id = Student.get(Student.student_id == student_id).id
-                score = float(self.tableWidget_5.item(row, 2 if term_type == "midterm" else 3).text())
+                score = float(self.tableWidget_5.item(row, 2 if term_type == "midterm_score" else 3).text())
+                print(f"Saving score for student {student_id}: {score}")
                 score_data[student_id] = score
 
             # حفظ الدرجات
@@ -803,9 +810,12 @@ class Main(QtWidgets.QMainWindow):
     
     def load_scores_for_term(self):
         #تحميل الدرجات حسب الترم المحدد
+        print("Loading scores for term...")
+        self.tableWidget_5.setRowCount(0)
+        self.load_students_for_scores()  # تحميل الطلاب أولاً
         try:
             course = self.comboBox.currentText()
-            term_type = "midterm" if self.radioButton.isChecked() else "final"  # تحديد نوع الترم
+            term_type = "midterm_score" if self.radioButton.isChecked() else "final_score"  # تحديد نوع الترم
             academic_year = self.comboBox_16.currentText()  # يجب إضافة Combobox للسنة            
             grade = self.comboBox_13.currentText()
             level = self.comboBox_14.currentText()
@@ -819,17 +829,18 @@ class Main(QtWidgets.QMainWindow):
             )
             
             # عرض البيانات في الجدول
-            self.tableWidget_5.setRowCount(0)
+            
             for row, score in enumerate(scores):
                 self.tableWidget_5.insertRow(row)
                 
                 # عرض بيانات الطالب
                 student = score.student
+                print(f"Loading score for student {student.student_id}: {score.midterm_score}, {score.final_score}")
                 self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_id))
                 self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
                 
                 # عرض الدرجات حسب الترم المحدد
-                if term_type == "midterm":
+                if term_type == "midterm_score":
                     self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(score.midterm_score or "")))
                     self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(""))
                 else:
