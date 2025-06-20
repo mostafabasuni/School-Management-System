@@ -26,7 +26,7 @@ class Grade(BaseModel):
     grade_id = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
     name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
-    section = CharField(null=True)     # الفصل (أ، ب، ج...)
+    term = CharField(null=True)     # الفصل (أ، ب، ج...)
     
 class Student(BaseModel):
     student_id = CharField(unique=True)
@@ -46,12 +46,16 @@ class Course(BaseModel):
     grade = ForeignKeyField(Grade, backref='courses', on_delete='CASCADE')
     teacher = ForeignKeyField(Teacher, backref='courses_teaching', null=True)
     
-class StudentCourse(BaseModel):
+class StudentScore(BaseModel):
     student = ForeignKeyField(Student, backref='enrollments')
     course = ForeignKeyField(Course, backref='enrollments')
     midterm_score = FloatField(null=True)
     final_score = FloatField(null=True)
-    
+    academic_year = CharField()      # السنة الدراسية (مثل 2023-2024)    
+    class Meta:
+        indexes = (
+            (('student', 'course', 'academic_year'), True),  # منع التكرار
+        )
 
     def calculate_final_grade(self):
         return (self.midterm_score * 0.4) + (self.final_score * 0.6)
@@ -73,7 +77,7 @@ class Permissions(BaseModel):
     permissions_tab = BooleanField()
 
 db.connect()
-db.create_tables([User, Student, Teacher, Grade, Course, StudentCourse, Permissions])
+db.create_tables([User, Student, Teacher, Grade, Course, StudentScore, Permissions])
 # Close the database connection when done
 '''student = Student()
 student.student_id = "ST1Prime1"
