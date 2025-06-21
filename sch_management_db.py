@@ -23,26 +23,26 @@ class User(BaseModel):
 
 class Grade(BaseModel):
     id = AutoField(primary_key=True)  # هذا الحقل ضروري
-    grade_id = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
+    grade_code = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
     name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
     term = CharField(null=True)     # الفصل الدراسي (الأول - الثاني.)
     academic_year = CharField()
     
 class Student(BaseModel):
-    student_id = CharField(unique=True)
+    student_code = CharField(unique=True)
     name = CharField()
     age = IntegerField()
     grade = ForeignKeyField(Grade, field=Grade.id, backref='students')  # تحديد الحقل المرتبط صراحةً
     registration_date = DateField(default=datetime.date.today)
 
 class Teacher(BaseModel):
-    teacher_id = CharField(unique=True)
+    teacher_code = CharField(unique=True)
     name = CharField()
     specialization = CharField()
 
 class Course(BaseModel):
-    course_id = CharField(unique=True)
+    course_code = CharField(unique=True)
     name = CharField()
     grade = ForeignKeyField(Grade, backref='courses', on_delete='CASCADE')
     teacher = ForeignKeyField(Teacher, backref='courses_teaching', null=True)
@@ -81,10 +81,10 @@ db.connect()
 db.create_tables([User, Student, Teacher, Grade, Course, StudentScore, Permissions])
 # Close the database connection when done
 '''student = Student()
-student.student_id = "ST1Prime1"
+student.student_code = "ST1Prime1"
 student.name = "Ahmed"
 student.age = 10    
-student.grade = Grade.get(Grade.grade_id == "PRIM-1")  # Assuming "PRIM-1" is a valid grade_id
+student.grade = Grade.get(Grade.grade_code == "PRIM-1")  # Assuming "PRIM-1" is a valid grade_code
 student.registration_date = datetime.date.today()'''
 db.close()
 
