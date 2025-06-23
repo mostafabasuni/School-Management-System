@@ -1,8 +1,18 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5 import QtGui
 from peewee import fn
 from peewee import DoesNotExist
 import sys
+
+from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
+from PyQt5.QtGui import QTextDocument, QPainter
+from PyQt5.QtCore import Qt, QTextStream, QFile
+from PyQt5.QtCore import QDate
+from PyQt5.QtGui import QPageLayout, QPageSize
+from PyQt5.QtGui import QPageLayout, QPageSize
+
 from grade_controller import GradeService  # استيراد وحدة التحكم للصفوف 
 from user_controller import UserManager  # استيراد وحدة التحكم للمستخدم
 from teacher_controller import TeacherService  # استيراد خدمة المعلم
@@ -29,6 +39,7 @@ class Main(QtWidgets.QMainWindow):
         self.setup_student_tab()  # إعدادات تبويب الطلاب        
         self.load_students()
         self.load_courses()
+        self.load_student_in_combo()
         
         self.radioButton.clicked.connect(self.load_scores_for_term)
         self.radioButton_2.toggled.connect(self.load_scores_for_term)
@@ -65,11 +76,14 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_26.clicked.connect(self.handle_student_update)
         self.pushButton_27.clicked.connect(self.handle_student_delete)
         self.pushButton_31.clicked.connect(self.save_course_scores)
+        self.pushButton_36.clicked.connect(self.open_student_score_tab)
+        self.pushButton_37.clicked.connect(self.student_search)
         self.pushButton_50.clicked.connect(self.clear_grade_form)
         self.pushButton_51.clicked.connect(self.handle_grade_creation)
         self.pushButton_52.clicked.connect(self.handle_grade_update)
         self.pushButton_53.clicked.connect(self.handle_grade_delete)
         self.pushButton_67.clicked.connect(self.open_grades_tab)
+        self.pushButton_68.clicked.connect(self.print_student_grades)
         
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
         self.load_teachers()
@@ -774,8 +788,8 @@ class Main(QtWidgets.QMainWindow):
                 return
 
             # الحصول على الـ IDs
-            grade_code = Grade.get(Grade.name == grade, Grade.level == level).id
-            course_code = Course.get(Course.name == course, Course.grade == grade_code).id
+            grade_id = Grade.get(Grade.name == grade, Grade.level == level).id
+            course_id = Course.get(Course.name == course, Course.grade == grade_id).id
 
             # جمع بيانات الدرجات
             score_data = {}
@@ -788,7 +802,7 @@ class Main(QtWidgets.QMainWindow):
 
             # حفظ الدرجات
             success, message = ScoreService.save_scores(
-                course_code=course_code,
+                course_id=course_id,
                 score_data=score_data,
                 term_type=term_type,
                 academic_year=academic_year
@@ -865,7 +879,255 @@ class Main(QtWidgets.QMainWindow):
                 self.tableWidget_5.item(row, 4).setText(f"{total:.2f}")
             except:
                 self.tableWidget_5.item(row, 4).setText("0.00")
+    
+    def open_student_score_tab(self):
+        self.tabWidget.setCurrentIndex(7)
+    
+    def load_student_in_combo(self):
+        self.comboBox_2.clear()
+        for student in Student.select():
+            self.comboBox_2.addItem(student.name)
+    
+    def student_search(self):
+        try:
+            # جلب بيانات البحث
+            student_name = self.lineEdit_29.text().strip()
+            student_code = self.lineEdit_30.text().strip()
+            
+            # التحقق من المدخلات
+            if not (student_name or student_code):
+                QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى إدخال اسم الطالب أو رقمه")
+                return
+
+            # البحث باستخدام OR للسماح بالبحث بكلا الحقلين معاً
+            query = Student.select()
+            if student_name and student_code:
+                query = query.where(
+                    (Student.name.contains(student_name)) &
+                    (Student.student_code == student_code)
+                )
+            elif student_name:
+                query = query.where(Student.name.contains(student_name))
+            else:
+                query = query.where(Student.student_code == student_code)
+
+            student = query.first()
+
+            if not student:
+                QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد طالب بهذه البيانات")
+                return
+
+            # عرض بيانات الطالب
+            self.display_student_info(student)
+            
+            # عرض الدرجات
+            self.display_student_scores(student)
+
+        except DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "الطالب غير موجود")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
+
+    def display_student_info(self, student):
+        """عرض معلومات الطالب في الحقول المخصصة"""
+        self.lineEdit_24.setText(student.student_code)
+        self.comboBox_2.setCurrentText(student.name)
         
+        grade = student.grade  # الاستفادة من العلاقة المباشرة
+        self.lineEdit_28.setText(grade.name)
+        self.lineEdit_43.setText(grade.level)
+
+    def display_student_scores(self, student):
+        """عرض درجات الطالب في الجدول"""
+        self.tableWidget_6.setRowCount(0)
+        
+        # جلب الدرجات مع معلومات المادة في استعلام واحد (JOIN)
+        scores = (StudentScore
+                .select(StudentScore, Course)
+                .join(Course)
+                .where(StudentScore.student == student))
+        
+        for row, score in enumerate(scores):
+            self.tableWidget_6.insertRow(row)
+            course = score.course
+            
+            # إنشاء العناصر مرة واحدة
+            items = [
+                QtWidgets.QTableWidgetItem(course.course_code),
+                QtWidgets.QTableWidgetItem(course.name),
+                QtWidgets.QTableWidgetItem(str(score.midterm_score or "-")),
+                QtWidgets.QTableWidgetItem(str(score.final_score or "-")),
+                self.create_total_item(score)
+            ]
+            
+            for col, item in enumerate(items):
+                self.tableWidget_6.setItem(row, col, item)
+
+    def create_total_item(self, score):
+        """إنشاء عنصر الدرجة النهائية مع التنسيق"""
+        total = (score.midterm_score * 0.4 + score.final_score * 0.6) if score.midterm_score and score.final_score else None
+        item = QtWidgets.QTableWidgetItem(f"{total:.2f}" if total else "-")
+        
+        # تنسيق الخلية إذا كانت الدرجة أقل من النجاح
+        if total and total < 50:  # افترضنا أن 50 هي درجة النجاح
+            item.setBackground(QtGui.QColor(255, 200, 200))
+        return item
+
+    def print_student_grades(self):
+        try:
+            printer = QPrinter(QPrinter.HighResolution)
+            
+            # إعداد حجم الورق والاتجاه (محدث)
+            page_layout = QPageLayout()
+            page_layout.setPageSize(QPageSize(QPageSize.A4))
+            page_layout.setOrientation(QPageLayout.Portrait)  # أو QPageLayout.Landscape
+            printer.setPageLayout(page_layout)
+            
+            print_dialog = QPrintDialog(printer, self)
+            
+            if print_dialog.exec_() == QPrintDialog.Accepted:
+                document = QTextDocument()
+                document.setDefaultStyleSheet("""
+                    body { direction: rtl; font-family: Arial; margin: 30px; }
+                    table { width: 100%; border-collapse: collapse; direction: rtl; }
+                """)
+                
+                document.setHtml(self.generate_print_content())
+                document.print_(printer)
+                
+                QtWidgets.QMessageBox.information(self, "نجاح", "تم إرسال التقرير إلى الطابعة")
+        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء الطباعة: {str(e)}")
+            
+    def generate_print_content(self):
+        
+        font_settings = {
+        'header_font': 'Arial',  # خط العناوين الرئيسية
+        'header_size': '20pt',
+        'body_font': 'Times New Roman',  # خط النص العادي
+        'body_size': '16pt',
+        'table_header_font': 'Arial',
+        'table_header_size': '16pt',
+        'table_body_font': 'Arial',
+        'table_body_size': '11pt',
+        'signature_font': 'Arial',
+        'signature_size': '16pt'
+    }
+        student_code = self.lineEdit_24.text()
+        student_name = self.comboBox_2.currentText()
+        
+        html = f"""
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{
+                    font-family: {font_settings['body_font']};
+                    font-size: {font_settings['body_size']};
+                    margin: 0;
+                    padding: 20px;
+                    direction: rtl;
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 30px;
+                }}
+                .header h1 {{
+                font-family: '{font_settings['header_font']}';
+                font-size: {font_settings['header_size']};
+                color: #0066cc;
+                }}
+                .student-info {{
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+                padding: 15px;
+                background-color: #f9f9f9;
+                border-radius: 5px;
+                font-family: '{font_settings['body_font']}';
+                font-size: {font_settings['body_size']};
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }}
+                th {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px;
+                    text-align: right;
+                    font-family: '{font_settings['table_header_font']}';
+                    font-size: {font_settings['table_header_size']};
+                }}
+                td {{
+                    padding: 10px;
+                    border-bottom: 1px solid #ddd;
+                    text-align: right;
+                    font-family: '{font_settings['table_body_font']}';
+                    font-size: {font_settings['table_body_size']};
+                }}
+                .total {{
+                    font-weight: bold;
+                    color: #0066cc;
+                }}
+                .footer {{
+                    margin-top: 30px;
+                    text-align: center;
+                    float: left;
+                    font-family: '{font_settings['signature_font']}';
+                    font-size: {font_settings['signature_size']};
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1 style="color: #0066cc;">كشف درجات الطالب</h1>
+                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
+            </div>
+            
+            <div class="student-info">
+                <p><strong>:  اسم الطالب </strong>  {student_name}</p>
+                <p><strong>:  رقم الطالب </strong>  {student_code}</p>
+                <p><strong>:  الصف </strong>  {self.lineEdit_28.text()}</p>
+                <p><strong>:  المرحلة </strong>  {self.lineEdit_43.text()}</p>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>المجموع</th>
+                    <th>درجة نهاية العام</th>
+                    <th>درجة نصف العام</th>
+                    <th>اسم المادة</th>
+                    <th>كود المادة</th>
+                </tr>
+        """
+        
+        for row in range(self.tableWidget_6.rowCount()):
+            html += f"""
+            <tr>
+                <td class="total">{self.tableWidget_6.item(row, 4).text()}</td>
+                <td>{self.tableWidget_6.item(row, 3).text()}</td>
+                <td>{self.tableWidget_6.item(row, 2).text()}</td>
+                <td>{self.tableWidget_6.item(row, 1).text()}</td>
+                <td>{self.tableWidget_6.item(row, 0).text()}</td>
+            </tr>
+            """
+        
+        html += """
+            </table>
+            
+            <div class="footer">
+                <p>: توقيع المسئول </p>
+                <p>: التاريخ </p>
+            </div>
+        </body>
+        </html>
+        """        
+        return html
+    
+    
 def main():
     app = QtWidgets.QApplication(sys.argv)
     Window = Main()
