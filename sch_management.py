@@ -39,7 +39,21 @@ class Main(QtWidgets.QMainWindow):
         self.setup_student_tab()  # إعدادات تبويب الطلاب        
         self.load_students()
         self.load_courses()
+        self.load_users_in_combo()
         self.load_student_in_combo()
+        self.apply_permissions()
+
+        self.permission_checkboxes = [
+        self.checkBox_15,  # users_tab
+        self.checkBox_18,  # teachers_tab
+        self.checkBox_16,  # courses_tab
+        self.checkBox_25,  # students_tab
+        self.checkBox_26,  # scores_tab
+        self.checkBox_28,  # student_score_tab
+        self.checkBox_27,  # permissions_tab
+        self.checkBox_21,  # grades_tab
+        ]
+    
         
         self.radioButton.clicked.connect(self.load_scores_for_term)
         self.radioButton_2.toggled.connect(self.load_scores_for_term)
@@ -58,6 +72,8 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_3.clicked.connect(self.open_courses_tab)
         self.pushButton_4.clicked.connect(self.open_students_tab)
         self.pushButton_5.clicked.connect(self.open_scores_tab)
+        self.pushButton_6.clicked.connect(self.open_permission_tab)
+        self.pushButton_7.clicked.connect(self.logout)
         self.pushButton_8.clicked.connect(self.handle_login)
         self.pushButton_9.clicked.connect(self.clear_user_form)
         self.pushButton_10.clicked.connect(self.handle_user_creation)
@@ -75,7 +91,9 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_25.clicked.connect(self.handle_student_registration)
         self.pushButton_26.clicked.connect(self.handle_student_update)
         self.pushButton_27.clicked.connect(self.handle_student_delete)
+        self.pushButton_29.clicked.connect(self.save_permissions)
         self.pushButton_31.clicked.connect(self.save_course_scores)
+        self.pushButton_35.clicked.connect(self.toggle_all_permissions)
         self.pushButton_36.clicked.connect(self.open_student_score_tab)
         self.pushButton_37.clicked.connect(self.student_search)
         self.pushButton_50.clicked.connect(self.clear_grade_form)
@@ -84,6 +102,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_53.clicked.connect(self.handle_grade_delete)
         self.pushButton_67.clicked.connect(self.open_grades_tab)
         self.pushButton_68.clicked.connect(self.print_student_grades)
+        self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
         self.load_teachers()
@@ -226,6 +245,15 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_6.clear()
         self.lineEdit_7.clear()
         self.checkBox.setChecked(False)
+    
+    def load_users_in_combo(self):
+        self.comboBox_3.clear()
+        self.comboBox_3.addItem("اختر مستخدم")
+        users = User.select()
+        for user in users:
+            self.comboBox_3.addItem(user.fullname)
+            
+        
 # =================== Users ends =========================
 # =================== Teachers =========================
     def load_teachers(self):
@@ -1127,7 +1155,130 @@ class Main(QtWidgets.QMainWindow):
         """        
         return html
     
+    # =================== scores End =========================
+# =================== Permissions =========================
     
+    def open_permission_tab(self):
+        self.tabWidget.setCurrentIndex(8)
+        
+    def save_permissions(self):
+        user_name = self.comboBox_3.currentText()
+
+        try:
+            user = User.get(User.fullname == user_name)
+
+            if user.is_admin:
+                users_tab = 1
+                teachers_tab = 1
+                courses_tab = 1
+                students_tab = 1
+                student_scores_tab = 1
+                grades_tab = 1
+                scorses_tab = 1
+                permissions_tab = 1
+            else:
+                users_tab = 1 if self.checkBox_15.isChecked() else 0
+                teachers_tab = 1 if self.checkBox_18.isChecked() else 0
+                students_tab = 1 if self.checkBox_25.isChecked() else 0
+                courses_tab = 1 if self.checkBox_16.isChecked() else 0
+                grades_tab = 1 if self.checkBox_21.isChecked() else 0
+                scorses_tab = 1 if self.checkBox_26.isChecked() else 0
+                student_scores_tab = 1 if self.checkBox_28.isChecked() else 0
+                permissions_tab = 1 if self.checkBox_27.isChecked() else 0
+
+            permission, created = Permissions.get_or_create(
+                user=user,
+                defaults={
+                    "users_tab": users_tab,
+                    "teachers_tab": teachers_tab,
+                    "students_tab": students_tab,
+                    "courses_tab": courses_tab,
+                    "grades_tab": grades_tab,
+                    "scorses_tab": scorses_tab,
+                    "student_scores_tab": student_scores_tab,
+                    "permissions_tab": permissions_tab
+                }
+            )
+
+            if not created:
+                permission.users_tab = users_tab
+                permission.teachers_tab = teachers_tab
+                permission.students_tab = students_tab
+                permission.courses_tab = courses_tab
+                permission.grades_tab = grades_tab
+                permission.scorses_tab = scorses_tab
+                permission.student_scores_tab = student_scores_tab
+                permission.permissions_tab = permissions_tab
+                permission.save()
+
+            QtWidgets.QMessageBox.information(self, "تم", "تم حفظ الصلاحيات بنجاح")
+
+        except User.DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "خطأ", f"المستخدم '{user_name}' غير موجود")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"فشل في الحفظ:\n{e}")
+
+    def apply_permissions(self):        
+        if not self.user_manager.logged_user:
+            return
+
+        try:
+            permission = Permissions.get(Permissions.user == self.user_manager.logged_user)
+
+            self.pushButton.setEnabled(permission.users_tab)
+            self.pushButton_2.setEnabled(permission.teachers_tab)
+            self.pushButton_3.setEnabled(permission.courses_tab)
+            self.pushButton_4.setEnabled(permission.students_tab)
+            self.pushButton_5.setEnabled(permission.scores_tab)
+            self.pushButton_6.setEnabled(permission.permissions_tab)
+            self.pushButton_36.setEnabled(permission.student_score_tab)
+            self.pushButton_67.setEnabled(permission.grades_tab)
+
+        except Permissions.DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "لا توجد صلاحيات محددة لهذا المستخدم")
+
+    def toggle_all_permissions(self):
+        # هل جميع الصلاحيات مفعلة؟
+        all_checked = all(cb.isChecked() for cb in self.permission_checkboxes)
+
+        for cb in self.permission_checkboxes:
+            cb.setChecked(not all_checked)
+
+    def show_permissions(self):
+        user_name = self.comboBox_3.currentText()
+        if not user_name:
+            return
+
+        try:
+            user = User.get(User.fullname == user_name)
+            permission = Permissions.get(Permissions.user == user)
+
+            self.checkBox_15.setChecked(permission.users_tab)
+            self.checkBox_18.setChecked(permission.teachers_tab)
+            self.checkBox_25.setChecked(permission.students_tab)
+            self.checkBox_16.setChecked(permission.courses_tab)
+            self.checkBox_21.setChecked(permission.grades_tab)
+            self.checkBox_28.setChecked(permission.student_score_tab)
+            self.checkBox_26.setChecked(permission.scores_tab)
+            self.checkBox_27.setChecked(permission.permissions_tab)
+        except Permissions.DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "لا توجد صلاحيات محددة لهذا المستخدم")
+        except User.DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "المستخدم غير موجود")
+    
+    def logout(self):        
+        self.pushButton.setEnabled(False)
+        self.pushButton_2.setEnabled(False)
+        self.pushButton_3.setEnabled(False)
+        self.pushButton_4.setEnabled(False)
+        self.pushButton_5.setEnabled(False)
+        self.pushButton_6.setEnabled(False)
+        self.pushButton_36.setEnabled(False)
+        self.pushButton_67.setEnabled(False)       
+        self.pushButton_8.setEnabled(True)
+        self.tabWidget.setCurrentIndex(0)
+        
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     Window = Main()

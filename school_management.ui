@@ -4505,11 +4505,11 @@
        </property>
        <property name="font">
         <font>
-         <pointsize>10</pointsize>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>المواد الدراسية</string>
+        <string>الصفوف الدراسية</string>
        </property>
       </widget>
      </widget>
