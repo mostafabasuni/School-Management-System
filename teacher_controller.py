@@ -5,19 +5,19 @@ class TeacherService:
         pass
 
     @staticmethod
-    def create_teacher(id, name, subject):
+    def create_teacher(t_code, name, subject):
         try:            
-            return {Teacher.create(teacher_id=id, 
+            return {Teacher.create(teacher_code=t_code, 
                             name=name, 
                             specialization=subject)}
         except Exception as e:
             print(f"Error creating teacher: {e}")
             return None
     
-    def update_teacher(self, id, teacher_id, name, subject):
+    def update_teacher(self, id, teacher_code, name, subject):
         try:
             teacher = Teacher.get(Teacher.id == id)
-            teacher.teacher_id = teacher_id
+            teacher.teacher_code = teacher_code
             teacher.name = name
             teacher.specialization = subject
             teacher.save()

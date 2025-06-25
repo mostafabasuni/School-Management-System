@@ -3,17 +3,13 @@ from peewee import DoesNotExist
 
 class CourseService:
     @staticmethod
-    def create_course(course_id, name, grade_id, teacher_id=None):
+    def create_course(course_code, name, grade_id, teacher_id):
         try:
-            # التحقق من وجود الصف والمدرس
-            grade = Grade.get(Grade.grade_id == grade_id)
-            teacher = Teacher.get(Teacher.teacher_id == teacher_id) if teacher_id else None
-            
             course = Course.create(
-                course_id=course_id,
+                course_code=course_code,
                 name=name,
-                grade=grade,
-                teacher=teacher
+                grade=grade_id,
+                teacher=teacher_id
             )
             return True, "تم إنشاء المادة الدراسية بنجاح"
         except DoesNotExist:

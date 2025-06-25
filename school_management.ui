@@ -603,7 +603,7 @@
         </font>
        </property>
        <property name="text">
-        <string>رقم المدرس</string>
+        <string>كود المدرس</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_14">
@@ -904,7 +904,7 @@
         </font>
        </property>
        <property name="text">
-        <string>رقم المادة</string>
+        <string>كود المادة</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_17">
@@ -949,9 +949,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>367</x>
+         <x>317</x>
          <y>40</y>
-         <width>101</width>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -964,9 +964,9 @@
       <widget class="QLineEdit" name="lineEdit_15">
        <property name="geometry">
         <rect>
-         <x>337</x>
+         <x>317</x>
          <y>86</y>
-         <width>131</width>
+         <width>151</width>
          <height>28</height>
         </rect>
        </property>
@@ -3645,7 +3645,7 @@
        <rect>
         <x>10</x>
         <y>280</y>
-        <width>901</width>
+        <width>881</width>
         <height>251</height>
        </rect>
       </property>

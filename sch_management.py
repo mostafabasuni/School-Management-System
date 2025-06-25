@@ -280,18 +280,19 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_11.setText(teacher.specialization)
         
     def handle_teacher_creation(self):
-        id_ = self.lineEdit_9.text().strip()
+        t_code = self.lineEdit_9.text().strip()
         teacher_name = self.lineEdit_10.text().strip()
         subject = self.lineEdit_11.text().strip()        
-        if not id_ or not teacher_name or not subject:
+        if not t_code or not teacher_name or not subject:
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
             return        
-        if TeacherService.create_teacher(id_, teacher_name, subject):
+        if TeacherService.create_teacher(t_code, teacher_name, subject):
             QtWidgets.QMessageBox.information(self, "نجاح", "تم إضافة المعلم بنجاح.")
             self.lineEdit_9.clear()
             self.lineEdit_10.clear()
             self.lineEdit_11.clear()
             self.load_teachers()
+            self.setup_courses_tab()  # إعادة تحميل الدورات بعد إضافة معلم جديد
 
     def handle_teacher_update(self):
         selected_row = self.tableWidget_2.currentRow()
@@ -441,28 +442,30 @@ class Main(QtWidgets.QMainWindow):
     def handle_course_creation(self):
         course_code = self.lineEdit_14.text().strip()
         course_name = self.lineEdit_15.text().strip()
-        teacher_code = self.comboBox_7.currentData()
+        teacher_code = self.comboBox_7.currentData()        
         grade = self.comboBox_8.currentText()   
         level = self.comboBox_9.currentText()
         term = self.comboBox_10.currentText()
-        grade_code = Grade.get(Grade.name == grade, Grade.level == level, Grade.term == term).grade_code if grade and level and term else None
+        grade_id = Grade.get(Grade.name == grade, Grade.level == level, Grade.term == term).id if grade and level and term else None
+        teacher_id = Teacher.get(Teacher.teacher_code == teacher_code).id if teacher_code else None
         
 
-        if not all([course_code, course_name, grade_code]):
+        if not all([course_code, course_name, grade_id]):
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول الإجبارية")
             return
 
         success, message = self.course_manager.create_course(
             course_code=course_code,
             name=course_name,
-            grade_code=grade_code,
-            teacher_code=teacher_code
+            grade_id=grade_id,
+            teacher_id=teacher_id
         )
 
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.load_courses()
             self.clear_course_form()
+            self.setup_courses_tab()  # إعادة تحميل الدورات بعد إضافة مادة جديدة
         else:
             QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
@@ -887,9 +890,9 @@ class Main(QtWidgets.QMainWindow):
                         self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(score.midterm_score or "")))
                         self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(str(score.final_score or "")))
                     
-                    # حساب المجموع
-                    total = (score.midterm_score * 0.4 + score.final_score * 0.6) if score.midterm_score and score.final_score else None
-                    self.tableWidget_5.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total) if total else ""))
+                        # حساب المجموع
+                        total = (score.midterm_score * 0.5 + score.final_score * 0.5) if score.midterm_score and score.final_score else None
+                        self.tableWidget_5.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total) if total else ""))
             else:
                 self.load_students_for_scores()
 
@@ -903,7 +906,7 @@ class Main(QtWidgets.QMainWindow):
             try:
                 midterm = float(self.tableWidget_5.item(row, 2).text() or 0)
                 final = float(self.tableWidget_5.item(row, 3).text() or 0)
-                total = (midterm * 0.4) + (final * 0.6)
+                total = (midterm * 0.5) + (final * 0.5)
                 self.tableWidget_5.item(row, 4).setText(f"{total:.2f}")
             except:
                 self.tableWidget_5.item(row, 4).setText("0.00")
@@ -993,7 +996,7 @@ class Main(QtWidgets.QMainWindow):
 
     def create_total_item(self, score):
         """إنشاء عنصر الدرجة النهائية مع التنسيق"""
-        total = (score.midterm_score * 0.4 + score.final_score * 0.6) if score.midterm_score and score.final_score else None
+        total = (score.midterm_score * 0.5 + score.final_score * 0.5) if score.midterm_score and score.final_score else None
         item = QtWidgets.QTableWidgetItem(f"{total:.2f}" if total else "-")
         
         # تنسيق الخلية إذا كانت الدرجة أقل من النجاح
