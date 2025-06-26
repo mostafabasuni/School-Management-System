@@ -28,6 +28,29 @@ class Grade(BaseModel):
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
     term = CharField(null=True)     # الفصل الدراسي (الأول - الثاني.)
     academic_year = CharField()
+    is_calculated = BooleanField(default=False)  # لتتبع ما إذا تم حساب النتائج
+    
+    def update_class_totals(self, academic_year):
+        """تحديث نتائج جميع طلاب الصف"""
+        try:
+            with db.atomic():
+                students = Student.select().where(Student.grade == self.id)
+                
+                for student in students:
+                    totals = ScoreService.calculate_student_totals(student.id, academic_year)
+                    if totals:
+                        student.midterm_total = totals['midterm_total']
+                        student.final_total = totals['final_total']
+                        student.overall_average = totals['overall_total']
+                        student.save()
+                
+                self.is_calculated = True
+                self.save()
+            
+            return True, f"تم تحديث نتائج {students.count()} طالباً"
+        
+        except Exception as e:
+            return False, f"خطأ في تحديث الصف: {str(e)}"
     
 class Student(BaseModel):
     student_code = CharField(unique=True)
@@ -35,6 +58,17 @@ class Student(BaseModel):
     age = IntegerField()
     grade = ForeignKeyField(Grade, field=Grade.id, backref='students')  # تحديد الحقل المرتبط صراحةً
     registration_date = DateField(default=datetime.date.today)
+    midterm_total = FloatField(default=0.0)
+    final_total = FloatField(default=0.0)
+    overall_average = FloatField(default=0.0)
+    def update_totals(self, academic_year):
+        """تحديث المجاميع في سجل الطالب"""
+        totals = ScoreService.calculate_student_totals(self.id, academic_year)
+        if totals:
+            self.midterm_total = totals['midterm_total']
+            self.final_total = totals['final_total']
+            self.overall_average = totals['overall_total']
+            self.save()
 
 class Teacher(BaseModel):
     teacher_code = CharField(unique=True)
@@ -58,8 +92,9 @@ class StudentScore(BaseModel):
             (('student', 'course', 'academic_year'), True),  # منع التكرار
         )
 
-    def calculate_final_grade(self):
-        return (self.midterm_score * 0.4) + (self.final_score * 0.6)
+    '''def calculate_final_grade(self):
+        return (self.midterm_score * 0.5) + (self.final_score * 0.5)
+'''
 
     class Meta:
         indexes = (

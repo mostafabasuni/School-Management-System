@@ -4354,6 +4354,219 @@
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="tab_19">
+     <attribute name="title">
+      <string>النتائج النهائية</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidget_13">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>220</y>
+        <width>881</width>
+        <height>311</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Tajawal</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <column>
+       <property name="text">
+        <string>رقم الطالب</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>Tajawal</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>اسم الطالب</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>درجة نصف العام</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>درجة نهاية العام</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الدرجة النهائية</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_28">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>40</y>
+        <width>601</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>بيانات الصف</string>
+      </property>
+      <widget class="QLabel" name="label_67">
+       <property name="geometry">
+        <rect>
+         <x>125</x>
+         <y>90</y>
+         <width>43</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>الصف</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_18">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>90</y>
+         <width>91</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_19">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>35</y>
+         <width>111</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_68">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>35</y>
+         <width>121</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>الفصل الدراسي</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_20">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>35</y>
+         <width>111</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+       <property name="currentText">
+        <string/>
+       </property>
+       <property name="currentIndex">
+        <number>-1</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_69">
+       <property name="geometry">
+        <rect>
+         <x>460</x>
+         <y>35</y>
+         <width>111</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>العام الدراسي</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_21">
+       <property name="geometry">
+        <rect>
+         <x>410</x>
+         <y>90</y>
+         <width>101</width>
+         <height>29</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_70">
+       <property name="geometry">
+        <rect>
+         <x>520</x>
+         <y>90</y>
+         <width>51</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>المرحلة</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
     <widget class="QWidget" name="tab_7">
      <attribute name="title">
       <string>الصلاحيات</string>

@@ -56,11 +56,22 @@ class Main(QtWidgets.QMainWindow):
     
         
         self.radioButton.clicked.connect(self.load_scores_for_term)
-        self.radioButton_2.toggled.connect(self.load_scores_for_term)
+        self.radioButton_2.clicked.connect(self.load_scores_for_term)
         self.comboBox_16.currentIndexChanged.connect(self.load_scores_for_term)
         
+        # عند تغيير الصف
+        self.comboBox_class.currentIndexChanged.connect(self.refresh_class_results)
+
+        # عند تغيير السنة
+        self.comboBox_year.currentIndexChanged.connect(self.refresh_class_results)
+
+        # زر التحديث
+        self.pushButton_refresh.clicked.connect(self.refresh_class_results)
+
+        # زر التصدير
+        self.pushButton_export.clicked.connect(self.export_results)
         
-        
+        self.tableWidget_5.setColumnHidden(0, True)  # إخفاء العمود الأول (ID)    
         #self.tableWidget_5.cellChanged.connect(self.calculate_totals)
         self.tableWidget.itemClicked.connect(self.user_table_select)
         self.tableWidget_2.itemClicked.connect(self.teacher_table_select)
@@ -1158,7 +1169,230 @@ class Main(QtWidgets.QMainWindow):
         """        
         return html
     
-    # =================== scores End =========================
+# =================== scores End =========================
+
+# =================== النتائج النهائية =========================
+
+    def display_top_students(self, grade_id=None):
+        """عرض العشرة الأوائل (لصف معين أو للمدرسة ككل)"""
+        try:
+            academic_year = self.comboBox_year.currentText()
+            
+            if grade_id:
+                rankings = ScoreService.calculate_class_rankings(grade_id, academic_year)
+                title = "أوائل الصف"
+            else:
+                rankings = ScoreService.calculate_school_rankings(academic_year)
+                title = "أوائل المدرسة"
+            
+            self.tableWidget_top.setRowCount(0)
+            
+            for row, record in enumerate(rankings[:10]):  # عرض أول 10 فقط
+                student = record['student'] if grade_id else record
+                
+                self.tableWidget_top.insertRow(row)
+                self.tableWidget_top.setItem(row, 0, QtWidgets.QTableWidgetItem(str(row+1)))
+                self.tableWidget_top.setItem(row, 1, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_top.setItem(row, 2, QtWidgets.QTableWidgetItem(student.name))
+                
+                avg = record['overall_average'] if grade_id else student.overall_average
+                self.tableWidget_top.setItem(row, 3, QtWidgets.QTableWidgetItem(f"{avg:.2f}"))
+                
+                # تلوين الصفوف الثلاثة الأولى
+                if row < 3:
+                    for col in range(self.tableWidget_top.columnCount()):
+                        self.tableWidget_top.item(row, col).setBackground(QColor(253, 253, 150))
+        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+    def update_all_grades(self):
+        """تحديث جميع صفوف المدرسة"""
+        try:
+            academic_year = self.comboBox_year.currentText()
+            total_students = 0
+            
+            for grade in Grade.select():
+                success, message = grade.update_class_totals(academic_year)
+                if success:
+                    total_students += Student.select().where(Student.grade == grade.id).count()
+            
+            QtWidgets.QMessageBox.information(
+                self, 
+                "تم التحديث",
+                f"تم تحديث نتائج {total_students} طالباً في جميع الصفوف"
+            )
+            
+            # تحديث التصنيفات تلقائياً
+            self.display_top_students()
+        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"فشل التحديث الشامل: {str(e)}")
+    
+    def display_class_results(self, grade_id):
+        """عرض نتائج جميع طلاب الصف مع التصنيف"""
+        try:
+            academic_year = self.comboBox_year.currentText()
+            grade = Grade.get_by_id(grade_id)
+            
+            # جلب الطلاب مصنفين مع معلومات الصف
+            students = (Student
+                    .select(Student, Grade)
+                    .join(Grade)
+                    .where(
+                        (Student.grade == grade_id) &
+                        (Student.overall_average > 0)
+                    )
+                    .order_by(Student.overall_average.desc()))
+            
+            # إعداد الجدول
+            self.tableWidget_13.setRowCount(0)
+            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
+            headers = [
+                "الترتيب", "رقم الطالب", "اسم الطالب", 
+                "مجموع نصف العام", "مجموع النهائي", 
+                "المعدل العام", "التقدير"
+            ]
+            self.tableWidget_13.setHorizontalHeaderLabels(headers)
+            
+            # تعبئة البيانات
+            for row, student in enumerate(students):
+                self.tableWidget_13.insertRow(row)
+                
+                items = [
+                    QtWidgets.QTableWidgetItem(str(row + 1)),
+                    QtWidgets.QTableWidgetItem(student.student_code),
+                    QtWidgets.QTableWidgetItem(student.name),
+                    QtWidgets.QTableWidgetItem(f"{student.midterm_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.final_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.overall_average:.2f}"),
+                    QtWidgets.QTableWidgetItem(self.get_grade_letter(student.overall_average))
+                ]
+                
+                # تعبئة الخلايا
+                for col, item in enumerate(items):
+                    self.tableWidget_13.setItem(row, col, item)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    
+                    # تنسيق الصفوف الأولى
+                    if row < 3:
+                        item.setBackground(QColor(255, 235, 156))  # لون ذهبي للاوائل
+                    elif student.overall_average < 50:
+                        item.setBackground(QColor(255, 200, 200))  # لون أحمر للراسبين
+            
+            # ضبط إعدادات الجدول
+            self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.tableWidget_13.setSortingEnabled(True)
+            
+            # إضافة إحصاءات أسفل الجدول
+            self.label_class_stats.setText(
+                f"إحصاءات الصف: {grade.name}\n"
+                f"عدد الطلاب: {students.count()} | "
+                f"أعلى معدل: {students[0].overall_average:.2f} | "
+                f"أقل معدل: {students[-1].overall_average:.2f} | "
+                f"المعدل العام: {self.calculate_class_average(students):.2f}"
+            )
+        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+    def get_grade_letter(self, score):
+        """تحويل المعدل إلى تقدير"""
+        if score >= 90: return "ممتاز"
+        elif score >= 80: return "جيد جداً"
+        elif score >= 70: return "جيد"
+        elif score >= 60: return "مقبول"
+        else: return "راسب"
+
+
+    def display_class_results(self, grade_id):
+        """عرض نتائج جميع طلاب الصف مع التصنيف"""
+        try:
+            academic_year = self.comboBox_year.currentText()
+            grade = Grade.get_by_id(grade_id)
+            
+            # جلب الطلاب مصنفين مع معلومات الصف
+            students = (Student
+                    .select(Student, Grade)
+                    .join(Grade)
+                    .where(
+                        (Student.grade == grade_id) &
+                        (Student.overall_average > 0)
+                    )
+                    .order_by(Student.overall_average.desc()))
+            
+            # إعداد الجدول
+            self.tableWidget_13.setRowCount(0)
+            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
+            headers = [
+                "الترتيب", "رقم الطالب", "اسم الطالب", 
+                "مجموع نصف العام", "مجموع النهائي", 
+                "المعدل العام", "التقدير"
+            ]
+            self.tableWidget_13.setHorizontalHeaderLabels(headers)
+            
+            # تعبئة البيانات
+            for row, student in enumerate(students):
+                self.tableWidget_13.insertRow(row)
+                
+                items = [
+                    QtWidgets.QTableWidgetItem(str(row + 1)),
+                    QtWidgets.QTableWidgetItem(student.student_code),
+                    QtWidgets.QTableWidgetItem(student.name),
+                    QtWidgets.QTableWidgetItem(f"{student.midterm_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.final_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.overall_average:.2f}"),
+                    QtWidgets.QTableWidgetItem(self.get_grade_letter(student.overall_average))
+                ]
+                
+                # تعبئة الخلايا
+                for col, item in enumerate(items):
+                    self.tableWidget_13.setItem(row, col, item)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    
+                    # تنسيق الصفوف الأولى
+                    if row < 3:
+                        item.setBackground(QColor(255, 235, 156))  # لون ذهبي للاوائل
+                    elif student.overall_average < 50:
+                        item.setBackground(QColor(255, 200, 200))  # لون أحمر للراسبين
+            
+            # ضبط إعدادات الجدول
+            self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.tableWidget_13.setSortingEnabled(True)
+            
+            # إضافة إحصاءات أسفل الجدول
+            self.label_class_stats.setText(
+                f"إحصاءات الصف: {grade.name}\n"
+                f"عدد الطلاب: {students.count()} | "
+                f"أعلى معدل: {students[0].overall_average:.2f} | "
+                f"أقل معدل: {students[-1].overall_average:.2f} | "
+                f"المعدل العام: {self.calculate_class_average(students):.2f}"
+            )
+        
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+    def get_grade_letter(self, score):
+        """تحويل المعدل إلى تقدير"""
+        if score >= 90: return "ممتاز"
+        elif score >= 80: return "جيد جداً"
+        elif score >= 70: return "جيد"
+        elif score >= 60: return "مقبول"
+        else: return "راسب"
+
+    def calculate_class_average(self, students):
+        """حساب المعدل العام للصف"""
+        total = sum(s.overall_average for s in students)
+        return total / len(students) if students else 0
+    
+    
+    def print_class_results(self):
+        printer = QPrinter()
+        dialog = QPrintDialog(printer, self)
+        if dialog.exec_():
+            # ... (كود الطباعة المشابه للدالة السابقة)
+            
+# ==================== نهاية  النتائج النهائية =========================
 # =================== Permissions =========================
     
     def open_permission_tab(self):

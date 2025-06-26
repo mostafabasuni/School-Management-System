@@ -57,3 +57,4 @@ class CourseService:
         except Exception as e:
             return False, f"حدث خطأ أثناء الحذف: {str(e)}"
     
+    
