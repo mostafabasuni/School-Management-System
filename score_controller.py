@@ -1,4 +1,4 @@
-from sch_management_db import db, StudentScore, Student, Course
+from sch_management_db import db, StudentScore, Student, Grade, Course
 from peewee import *
 class ScoreService:
     @staticmethod
@@ -28,6 +28,76 @@ class ScoreService:
         #جلب قائمة الطلاب للصف المحدد
         return Student.select().where(Student.grade == grade_id)
     
+    
+    @staticmethod
+    def calculate_student_totals(grade_id, academic_year):
+        """
+        حساب التصنيفات داخل الصف
+        Returns:
+            list: قائمة مصنفة تحتوي على:
+                [{'student': student_obj, 'overall_average': x, 'rank': y}, ...]
+        """
+        print(f"Calculating totals for grade {grade_id} in academic year {academic_year}")
+        # جلب الطلاب في الصف المحدد مع درجاتهم
+        students = (Student
+                .select()
+                .where(
+                (Student.grade == grade_id) &
+                (Student.overall_average > 0)
+                )
+                .order_by(Student.overall_average.desc()))
+        
+        rankings = []
+        for rank, student in enumerate(students, start=1):
+            rankings.append({
+                'student': student,
+                'overall_average': student.overall_average,
+                'rank': rank
+            })
+        
+        return rankings
+    
+    
+    @staticmethod
+    def update_class_totals(grade_id, academic_year):        
+        """
+        تحديث نتائج جميع طلاب الصف
+        المعاملات:
+            grade_id (int): معرّف الصف
+            academic_year (str): السنة الدراسية (مثل "2023-2024")
+        
+        الإرجاع:
+            tuple: (success: bool, message: str)
+        """
+        try:
+            with db.atomic():
+                # جلب كائن الصف والتأكد من وجوده
+                grade = Grade.get_by_id(grade_id)
+                students = Student.select().where(Student.grade == grade_id)                
+                updated_count = 0
+                for student in students:
+                    # حساب المجاميع لكل طالب
+                    totals =  ScoreService.calculate_student_totals(student.id, academic_year)                    
+                    if totals:
+                        student.midterm_total = totals['midterm_total']
+                        student.final_total = totals['final_total']
+                        student.overall_average = totals['overall_total']
+                        student.save()
+                        updated_count += 1
+                
+                # تحديث حالة الصف
+                grade.is_calculated = True
+                grade.save()
+                
+                return True, f"تم تحديث {updated_count} طالبًا في الصف {grade.name}"
+                
+        except Grade.DoesNotExist:
+            return False, "الصف غير موجود"
+        except Exception as e:
+            return False, f"خطأ فني: {str(e)}"
+    
+
+    
     @staticmethod
     def calculate_class_rankings(grade_id, academic_year):
         """
@@ -39,8 +109,8 @@ class ScoreService:
         students = (Student
                 .select()
                 .where(
-                (Student.grade == grade_id) &
-                (Student.overall_average > 0)
+                    (Student.grade == grade_id) &
+                    (Student.overall_average > 0)
                 )
                 .order_by(Student.overall_average.desc()))
         

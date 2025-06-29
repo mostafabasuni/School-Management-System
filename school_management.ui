@@ -4364,7 +4364,7 @@
         <x>10</x>
         <y>220</y>
         <width>881</width>
-        <height>311</height>
+        <height>201</height>
        </rect>
       </property>
       <property name="font">
@@ -4428,7 +4428,7 @@
        <property name="geometry">
         <rect>
          <x>125</x>
-         <y>90</y>
+         <y>80</y>
          <width>43</width>
          <height>24</height>
         </rect>
@@ -4446,7 +4446,7 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>90</y>
+         <y>80</y>
          <width>91</width>
          <height>29</height>
         </rect>
@@ -4536,7 +4536,7 @@
        <property name="geometry">
         <rect>
          <x>410</x>
-         <y>90</y>
+         <y>80</y>
          <width>101</width>
          <height>29</height>
         </rect>
@@ -4551,7 +4551,7 @@
        <property name="geometry">
         <rect>
          <x>520</x>
-         <y>90</y>
+         <y>80</y>
          <width>51</width>
          <height>24</height>
         </rect>
@@ -4565,6 +4565,88 @@
         <string>المرحلة</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_69">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>120</y>
+         <width>111</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>تحديث البيانات</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_70">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>120</y>
+         <width>91</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>نهاية العام</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_71">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>120</y>
+         <width>121</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>العشرة الأوائل</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>430</y>
+        <width>341</width>
+        <height>111</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_73">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>460</y>
+        <width>81</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>طباعة</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_7">
@@ -4783,7 +4865,7 @@
       <x>940</x>
       <y>20</y>
       <width>150</width>
-      <height>431</height>
+      <height>481</height>
      </rect>
     </property>
     <property name="font">
@@ -4874,7 +4956,7 @@
      <property name="geometry">
       <rect>
        <x>11</x>
-       <y>380</y>
+       <y>440</y>
        <width>125</width>
        <height>36</height>
       </rect>
@@ -4887,7 +4969,7 @@
      <property name="geometry">
       <rect>
        <x>11</x>
-       <y>330</y>
+       <y>332</y>
        <width>125</width>
        <height>36</height>
       </rect>
@@ -4912,6 +4994,24 @@
      </property>
      <property name="text">
       <string>الصفوف الدراسية</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_72">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>390</y>
+       <width>125</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>13</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>النتائج النهائية</string>
      </property>
     </widget>
    </widget>

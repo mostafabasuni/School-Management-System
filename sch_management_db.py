@@ -29,29 +29,7 @@ class Grade(BaseModel):
     term = CharField(null=True)     # الفصل الدراسي (الأول - الثاني.)
     academic_year = CharField()
     is_calculated = BooleanField(default=False)  # لتتبع ما إذا تم حساب النتائج
-    
-    def update_class_totals(self, academic_year):
-        """تحديث نتائج جميع طلاب الصف"""
-        try:
-            with db.atomic():
-                students = Student.select().where(Student.grade == self.id)
-                
-                for student in students:
-                    totals = ScoreService.calculate_student_totals(student.id, academic_year)
-                    if totals:
-                        student.midterm_total = totals['midterm_total']
-                        student.final_total = totals['final_total']
-                        student.overall_average = totals['overall_total']
-                        student.save()
-                
-                self.is_calculated = True
-                self.save()
-            
-            return True, f"تم تحديث نتائج {students.count()} طالباً"
-        
-        except Exception as e:
-            return False, f"خطأ في تحديث الصف: {str(e)}"
-    
+
 class Student(BaseModel):
     student_code = CharField(unique=True)
     name = CharField()
@@ -61,14 +39,6 @@ class Student(BaseModel):
     midterm_total = FloatField(default=0.0)
     final_total = FloatField(default=0.0)
     overall_average = FloatField(default=0.0)
-    def update_totals(self, academic_year):
-        """تحديث المجاميع في سجل الطالب"""
-        totals = ScoreService.calculate_student_totals(self.id, academic_year)
-        if totals:
-            self.midterm_total = totals['midterm_total']
-            self.final_total = totals['final_total']
-            self.overall_average = totals['overall_total']
-            self.save()
 
 class Teacher(BaseModel):
     teacher_code = CharField(unique=True)
@@ -121,6 +91,9 @@ student.name = "Ahmed"
 student.age = 10    
 student.grade = Grade.get(Grade.grade_code == "PRIM-1")  # Assuming "PRIM-1" is a valid grade_code
 student.registration_date = datetime.date.today()'''
+
+'''student = Student()
+student.update_totals("2024-2025")'''
 db.close()
 
 
