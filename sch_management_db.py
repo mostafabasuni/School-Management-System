@@ -80,6 +80,7 @@ class Permissions(BaseModel):
     students_tab = BooleanField()
     scores_tab = BooleanField()
     student_score_tab = BooleanField()
+    final_results_tab = BooleanField()
     permissions_tab = BooleanField()
 
 db.connect()

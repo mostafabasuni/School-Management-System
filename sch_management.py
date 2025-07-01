@@ -124,9 +124,9 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_52.clicked.connect(self.handle_grade_update)
         self.pushButton_53.clicked.connect(self.handle_grade_delete)
         self.pushButton_67.clicked.connect(self.open_grades_tab)
-        self.pushButton_68.clicked.connect(self.print_student_grades)
+        self.pushButton_68.clicked.connect(self.print_settings)
         self.pushButton_72.clicked.connect(self.final_results_tab)
-        self.pushButton_73.clicked.connect(self.print_student_results)
+        self.pushButton_73.clicked.connect(self.print_settings)
         self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
@@ -179,14 +179,18 @@ class Main(QtWidgets.QMainWindow):
                     self.pushButton.setEnabled(True)
                 if p.teachers_tab:
                     self.pushButton_2.setEnabled(True)
-                if p.courses_tab:
+                if p.courses_tab:                
                     self.pushButton_3.setEnabled(True)
+                if p.grades_tab:
+                    self.pushButton_67.setEnabled(True)
                 if p.students_tab:
                     self.pushButton_4.setEnabled(True)
                 if p.scores_tab:
                     self.pushButton_5.setEnabled(True)
                 if p.student_score_tab:
                     self.pushButton_36.setEnabled(True)
+                if p.final_results_tab:
+                    self.pushButton_72.setEnabled(True)
                 if p.permissions_tab:
                     self.pushButton_6.setEnabled(True)
                     
@@ -1037,7 +1041,7 @@ class Main(QtWidgets.QMainWindow):
             item.setBackground(QtGui.QColor(255, 200, 200))
         return item
 
-    def print_student_grades(self):
+    def print_settings(self):
         try:
             printer = QPrinter(QPrinter.HighResolution)
             
@@ -1055,8 +1059,10 @@ class Main(QtWidgets.QMainWindow):
                     body { direction: rtl; font-family: Arial; margin: 30px; }
                     table { width: 100%; border-collapse: collapse; direction: rtl; }
                 """)
-                
-                document.setHtml(self.generate_print_content())
+                if self.tabWidget.currentIndex() == 7:
+                    document.setHtml(self.generate_student_grades_print())
+                else:
+                    document.setHtml(self.generate_class_grades_print())
                 document.print_(printer)
                 
                 QtWidgets.QMessageBox.information(self, "نجاح", "تم إرسال التقرير إلى الطابعة")
@@ -1064,7 +1070,7 @@ class Main(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء الطباعة: {str(e)}")
             
-    def generate_print_content(self):
+    def generate_student_grades_print(self):
         
         font_settings = {
         'header_font': 'Arial',  # خط العناوين الرئيسية
@@ -1286,8 +1292,8 @@ class Main(QtWidgets.QMainWindow):
             self.tableWidget_13.setRowCount(0)
             self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
             headers = [
-                "الترتيب", "رقم الطالب", "اسم الطالب", 
-                "مجموع نصف العام", "مجموع النهائي", 
+                "الترتيب", "كود الطالب", "اسم الطالب", 
+                "درجة نصف العام", "درجة نهاية العام", 
                 "المعدل العام", "التقدير"
             ]
             self.tableWidget_13.setHorizontalHeaderLabels(headers)
@@ -1375,6 +1381,7 @@ class Main(QtWidgets.QMainWindow):
                 student_scores_tab = 1
                 grades_tab = 1
                 scorses_tab = 1
+                final_results_tab = 1
                 permissions_tab = 1
             else:
                 users_tab = 1 if self.checkBox_15.isChecked() else 0
@@ -1384,6 +1391,7 @@ class Main(QtWidgets.QMainWindow):
                 grades_tab = 1 if self.checkBox_21.isChecked() else 0
                 scorses_tab = 1 if self.checkBox_26.isChecked() else 0
                 student_scores_tab = 1 if self.checkBox_28.isChecked() else 0
+                final_results_tab = 1 if self.checkBox_33.isChecked() else 0
                 permissions_tab = 1 if self.checkBox_27.isChecked() else 0
 
             permission, created = Permissions.get_or_create(
@@ -1396,6 +1404,7 @@ class Main(QtWidgets.QMainWindow):
                     "grades_tab": grades_tab,
                     "scorses_tab": scorses_tab,
                     "student_scores_tab": student_scores_tab,
+                    "final_results_tab": final_results_tab,
                     "permissions_tab": permissions_tab
                 }
             )
@@ -1408,6 +1417,7 @@ class Main(QtWidgets.QMainWindow):
                 permission.grades_tab = grades_tab
                 permission.scorses_tab = scorses_tab
                 permission.student_scores_tab = student_scores_tab
+                permission.final_results_tab = final_results_tab
                 permission.permissions_tab = permissions_tab
                 permission.save()
 
@@ -1433,6 +1443,7 @@ class Main(QtWidgets.QMainWindow):
             self.pushButton_6.setEnabled(permission.permissions_tab)
             self.pushButton_36.setEnabled(permission.student_score_tab)
             self.pushButton_67.setEnabled(permission.grades_tab)
+            self.pushButton_72.setEnabled(permission.final_results_tab)
 
         except Permissions.DoesNotExist:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "لا توجد صلاحيات محددة لهذا المستخدم")
@@ -1474,7 +1485,8 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_5.setEnabled(False)
         self.pushButton_6.setEnabled(False)
         self.pushButton_36.setEnabled(False)
-        self.pushButton_67.setEnabled(False)       
+        self.pushButton_67.setEnabled(False)
+        self.pushButton_72.setEnabled(False)
         self.pushButton_8.setEnabled(True)
         self.tabWidget.setCurrentIndex(0)
     
@@ -1551,72 +1563,131 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
             
     
-    def print_student_results(self):
-        from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
-        from PyQt5.QtGui import QTextDocument
-
-        # ===== HTML كامل مع ترويسة واتجاه RTL
-        html = """
-        <html dir='rtl'>
+    def generate_class_grades_print(self):
+        font_settings = {
+        'header_font': 'Arial',  # خط العناوين الرئيسية
+        'header_size': '20pt',
+        'body_font': 'Times New Roman',  # خط النص العادي
+        'body_size': '16pt',
+        'table_header_font': 'Arial',
+        'table_header_size': '12pt',
+        'table_body_font': 'Arial',
+        'table_body_size': '12pt',
+        'signature_font': 'Arial',
+        'signature_size': '16pt'
+    }
+        
+        html = f"""
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
         <head>
-        <style>
-            body {
-                font-family: 'Cairo', 'Arial', sans-serif;
-            }
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                text-align: center;
-                font-size: 14px;
-            }
-            th, td {
-                border: 1px solid black;
-                padding: 6px;
-            }
-            th {
-                background-color: #f0f0f0;
-            }
-            h2 {
-                text-align: center;
-            }
-        </style>
+            <meta charset="UTF-8">
+            <style>
+                body {{
+                    font-family: {font_settings['body_font']};
+                    font-size: {font_settings['body_size']};
+                    margin: 0;
+                    padding: 20px;
+                    direction: rtl;
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 30px;
+                }}
+                .header h1 {{
+                font-family: '{font_settings['header_font']}';
+                font-size: {font_settings['header_size']};
+                color: #0066cc;
+                }}
+                .student-info {{
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+                padding: 15px;
+                background-color: #f9f9f9;
+                border-radius: 5px;
+                font-family: '{font_settings['body_font']}';
+                font-size: {font_settings['body_size']};
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }}
+                th {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px;
+                    text-align: right;
+                    font-family: '{font_settings['table_header_font']}';
+                    font-size: {font_settings['table_header_size']};
+                }}
+                td {{
+                    padding: 10px;
+                    border-bottom: 1px solid #ddd;
+                    text-align: right;
+                    font-family: '{font_settings['table_body_font']}';
+                    font-size: {font_settings['table_body_size']};
+                }}
+                .total {{
+                    font-weight: bold;
+                    color: #0066cc;
+                }}
+                .footer {{
+                    margin-top: 30px;
+                    text-align: center;
+                    float: left;
+                    font-family: '{font_settings['signature_font']}';
+                    font-size: {font_settings['signature_size']};
+                }}
+            </style>
         </head>
         <body>
-            <h2>نتيجة الطلاب</h2>
+            <div class="header">
+                <h1 style="color: #0066cc;">كشف درجات الصف</h1>
+                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
+            </div>
+            
+            <div class="student-info">
+                <p><strong>:  العام الدراسي </strong>  {self.comboBox_20.currentText()}</p>
+                <p><strong>:  الفصل الدراسي </strong>  {self.comboBox_19.currentText()}</p>
+                <p><strong>:  المرحلة </strong>  {self.comboBox_21.currentText()}</p>
+                <p><strong>:  الصف </strong>  {self.comboBox_18.currentText()}</p>
+            </div>
+            
             <table>
                 <tr>
+                    <th>التقدير</th>
+                    <th>المعدل العام</th>
+                    <th>درجة نهاية العام</th>
+                    <th>درجة نصف العام</th>
                     <th>اسم الطالب</th>
-                    <th>مجموع نصف العام</th>
-                    <th>مجموع نهاية العام</th>
-                    <th>المتوسط النهائي</th>
+                    <th>كود الطالب</th>
+                    <th>الترتيب</th
                 </tr>
         """
-
-        # ==== إدراج بيانات من الجدول
-        row_count = self.tableWidget_13.rowCount()
-        col_count = self.tableWidget_13.columnCount()
-
-        for row in range(row_count):
-            html += "<tr>"
-            for col in range(col_count):
-                item = self.tableWidget_13.item(row, col)
-                value = item.text() if item else ""
-                html += f"<td>{value}</td>"
-            html += "</tr>"
-
+        
+        for row in range(self.tableWidget_13.rowCount()):
+            html += f"""
+            <tr>
+                <td>{self.tableWidget_13.item(row, 6).text()}</td>
+                <td class="total">{self.tableWidget_13.item(row, 5).text()}</td>
+                <td>{self.tableWidget_13.item(row, 4).text()}</td>
+                <td>{self.tableWidget_13.item(row, 3).text()}</td>
+                <td>{self.tableWidget_13.item(row, 2).text()}</td>
+                <td>{self.tableWidget_13.item(row, 1).text()}</td>
+                <td>{self.tableWidget_13.item(row, 0).text()}</td>
+            </tr>
+            """
+        
         html += """
             </table>
+            
+            <div class="footer">
+            </div>
         </body>
         </html>
-        """
-
-        # ==== إعداد الطابعة
-        printer = QPrinter(QPrinter.HighResolution)
-        dialog = QPrintDialog(printer, self)
-        if dialog.exec_() == QPrintDialog.Accepted:
-            doc = QTextDocument()
-            doc.setHtml(html)
-            doc.print_(printer)
+        """        
+        return html
 
             
 

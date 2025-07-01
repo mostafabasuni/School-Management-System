@@ -4410,7 +4410,7 @@
      <widget class="QGroupBox" name="groupBox_28">
       <property name="geometry">
        <rect>
-        <x>190</x>
+        <x>189</x>
         <y>40</y>
         <width>601</width>
         <height>161</height>
@@ -4568,10 +4568,10 @@
       <widget class="QPushButton" name="pushButton_69">
        <property name="geometry">
         <rect>
-         <x>420</x>
+         <x>470</x>
          <y>120</y>
-         <width>111</width>
-         <height>32</height>
+         <width>104</width>
+         <height>30</height>
         </rect>
        </property>
        <property name="font">
@@ -4586,10 +4586,10 @@
       <widget class="QPushButton" name="pushButton_70">
        <property name="geometry">
         <rect>
-         <x>260</x>
+         <x>190</x>
          <y>120</y>
-         <width>91</width>
-         <height>32</height>
+         <width>81</width>
+         <height>30</height>
         </rect>
        </property>
        <property name="font">
@@ -4604,10 +4604,10 @@
       <widget class="QPushButton" name="pushButton_71">
        <property name="geometry">
         <rect>
-         <x>70</x>
+         <x>30</x>
          <y>120</y>
-         <width>121</width>
-         <height>32</height>
+         <width>108</width>
+         <height>30</height>
         </rect>
        </property>
        <property name="font">
@@ -4617,6 +4617,24 @@
        </property>
        <property name="text">
         <string>العشرة الأوائل</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_74">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>120</y>
+         <width>83</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>نصف العام</string>
        </property>
       </widget>
      </widget>
@@ -4677,7 +4695,7 @@
         <x>570</x>
         <y>50</y>
         <width>151</width>
-        <height>331</height>
+        <height>361</height>
        </rect>
       </property>
       <property name="font">
@@ -4691,8 +4709,8 @@
       <widget class="QCheckBox" name="checkBox_15">
        <property name="geometry">
         <rect>
-         <x>15</x>
-         <y>35</y>
+         <x>20</x>
+         <y>39</y>
          <width>114</width>
          <height>28</height>
         </rect>
@@ -4704,8 +4722,8 @@
       <widget class="QCheckBox" name="checkBox_16">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>105</y>
+         <x>22</x>
+         <y>108</y>
          <width>110</width>
          <height>23</height>
         </rect>
@@ -4722,8 +4740,8 @@
       <widget class="QCheckBox" name="checkBox_18">
        <property name="geometry">
         <rect>
-         <x>29</x>
-         <y>70</y>
+         <x>32</x>
+         <y>76</y>
          <width>100</width>
          <height>23</height>
         </rect>
@@ -4740,8 +4758,8 @@
       <widget class="QCheckBox" name="checkBox_25">
        <property name="geometry">
         <rect>
-         <x>56</x>
-         <y>175</y>
+         <x>60</x>
+         <y>170</y>
          <width>73</width>
          <height>28</height>
         </rect>
@@ -4753,8 +4771,8 @@
       <widget class="QCheckBox" name="checkBox_26">
        <property name="geometry">
         <rect>
-         <x>52</x>
-         <y>210</y>
+         <x>57</x>
+         <y>207</y>
          <width>77</width>
          <height>28</height>
         </rect>
@@ -4766,8 +4784,8 @@
       <widget class="QCheckBox" name="checkBox_27">
        <property name="geometry">
         <rect>
-         <x>32</x>
-         <y>280</y>
+         <x>35</x>
+         <y>316</y>
          <width>97</width>
          <height>28</height>
         </rect>
@@ -4779,8 +4797,8 @@
       <widget class="QCheckBox" name="checkBox_28">
        <property name="geometry">
         <rect>
-         <x>9</x>
-         <y>245</y>
+         <x>14</x>
+         <y>244</y>
          <width>120</width>
          <height>28</height>
         </rect>
@@ -4792,10 +4810,10 @@
       <widget class="QCheckBox" name="checkBox_21">
        <property name="geometry">
         <rect>
-         <x>19</x>
+         <x>22</x>
          <y>140</y>
          <width>110</width>
-         <height>23</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="font">
@@ -4807,12 +4825,30 @@
         <string>الصفوف الدراسية</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="checkBox_33">
+       <property name="geometry">
+        <rect>
+         <x>11</x>
+         <y>281</y>
+         <width>122</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>النتائج النهائية</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_35">
       <property name="geometry">
        <rect>
         <x>570</x>
-        <y>400</y>
+        <y>420</y>
         <width>151</width>
         <height>41</height>
        </rect>
