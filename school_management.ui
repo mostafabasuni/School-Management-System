@@ -4252,6 +4252,11 @@
          <height>29</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
        <property name="editable">
         <bool>true</bool>
        </property>

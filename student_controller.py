@@ -3,11 +3,11 @@ from peewee import DoesNotExist, IntegrityError
 
 class StudentService:
     @staticmethod    
-    def register_student(student_id, name, age, grade_id, registration_date):        
+    def register_student(student_code, name, age, grade_id, registration_date):        
         try:
             # تأكد من أن grade_id هو ID الصف وليس كائن Grade
             student = Student.create(
-                student_id=student_id,
+                student_code=student_code,
                 name=name,
                 age=age,
                 grade=grade_id,  # سيتم تحويله تلقائياً لكائن Grade

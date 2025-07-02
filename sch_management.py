@@ -58,9 +58,9 @@ class Main(QtWidgets.QMainWindow):
         ]
     
         
-        self.radioButton.clicked.connect(self.load_scores_for_term)
-        self.radioButton_2.clicked.connect(self.load_scores_for_term)
-        self.comboBox_16.currentIndexChanged.connect(self.load_scores_for_term)
+        self.radioButton.clicked.connect(self.load_students_with_scores)
+        self.radioButton_2.clicked.connect(self.load_students_with_scores)
+        self.comboBox_16.currentIndexChanged.connect(self.load_students_with_scores)
         
         # عند تغيير الصف
         self.comboBox_18.currentIndexChanged.connect(self.display_class_results)
@@ -705,7 +705,7 @@ class Main(QtWidgets.QMainWindow):
                 student_code=student_code,
                 name=name,
                 age=age,
-                grade_code=grade.id,  # إرسال ID الصف فقط
+                grade_id=grade.id,  # إرسال ID الصف فقط
                 registration_date=reg_date
             )
 
@@ -828,6 +828,7 @@ class Main(QtWidgets.QMainWindow):
         
         self.tableWidget_5.setRowCount(0)
         for row, student in enumerate(students):
+            
             self.tableWidget_5.insertRow(row)
             self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
             self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
@@ -878,7 +879,7 @@ class Main(QtWidgets.QMainWindow):
 
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
-                self.load_scores_for_term()  # عرض الدرجات المحفوظة
+                self.load_students_with_scores()  # عرض الدرجات المحفوظة
             else:
                 QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
@@ -890,52 +891,60 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
         
     
-    def load_scores_for_term(self):
-        #تحميل الدرجات حسب الترم المحدد        
-        self.tableWidget_5.setRowCount(0)
+    def load_students_with_scores(self):
         try:
-            course = self.comboBox.currentText()
-            term_type = "midterm_score" if self.radioButton.isChecked() else "final_score"  # تحديد نوع الترم
-            academic_year = self.comboBox_16.currentText()  # يجب إضافة Combobox للسنة            
-            grade = self.comboBox_13.currentText()
+            self.tableWidget_5.setRowCount(0)
+
+            course_name = self.comboBox.currentText()
+            academic_year = self.comboBox_16.currentText()
+            grade_name = self.comboBox_13.currentText()
             level = self.comboBox_14.currentText()
-            grade_id = Grade.get(Grade.name == grade, Grade.level == level).id            
-            course = Course.get(Course.name == course, Course.grade == grade_id)
-            course_id, course_code = course.id, course.course_code
-            self.lineEdit_23.setText(course_code)  # عرض اختصار اسم المادة في الواجهة
-            # جلب الدرجات من قاعدة البيانات
-            scores = StudentScore.select().where(
-                (StudentScore.course == course_id) &
-                (StudentScore.academic_year == academic_year)
-            )
-            
-            # عرض البيانات في الجدول            
-            if scores:                
-                for row, score in enumerate(scores):
-                    self.tableWidget_5.insertRow(row)
-                    
-                    # عرض بيانات الطالب
-                    student = score.student                    
-                    self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
-                    self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
-                    
-                    # عرض الدرجات حسب الترم المحدد
-                    if term_type == "midterm_score":
-                        self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(score.midterm_score or "")))
-                        self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(""))
-                    else:
-                        self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(score.midterm_score or "")))
-                        self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(str(score.final_score or "")))
-                    
-                        # حساب المجموع
-                        total = (score.midterm_score * 0.5 + score.final_score * 0.5) if score.midterm_score and score.final_score else None
-                        self.tableWidget_5.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total) if total else ""))
-            else:
-                self.load_students_for_scores()
+
+            if not (course_name and academic_year and grade_name and level):
+                QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار كل الحقول المطلوبة")
+                return
+
+            # جلب الصف والمادة
+            grade = Grade.get(Grade.name == grade_name, Grade.level == level)
+            course = Course.get(Course.name == course_name, Course.grade == grade.id)
+            self.lineEdit_23.setText(course.course_code)
+
+            # جلب كل الطلاب في الصف
+            students = Student.select().where(Student.grade == grade)
+
+            for row, student in enumerate(students):
+                self.tableWidget_5.insertRow(row)
+                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+
+                # محاولة جلب الدرجات إن وُجدت
+                try:
+                    score = StudentScore.get(
+                        (StudentScore.student == student) &
+                        (StudentScore.course == course) &
+                        (StudentScore.academic_year == academic_year)
+                    )
+                    mid = score.midterm_score
+                    final = score.final_score
+                except StudentScore.DoesNotExist:
+                    mid = final = None
+
+                # إدراج الدرجات في الجدول
+                self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(mid if mid is not None else "")))
+                self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(str(final if final is not None else "")))
+
+                # المجموع النهائي
+                if mid is not None and final is not None:
+                    total = round((mid + final) / 2, 2)
+                    total_item = QtWidgets.QTableWidgetItem(str(total))
+                    total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
+                    self.tableWidget_5.setItem(row, 4, total_item)
+                else:
+                    self.tableWidget_5.setItem(row, 4, QtWidgets.QTableWidgetItem(""))
 
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات: {str(e)}")
-        
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")
+
         
     def calculate_totals(self):
         #حساب الدرجات النهائية وعرضها
@@ -1340,10 +1349,10 @@ class Main(QtWidgets.QMainWindow):
 
     def get_grade_letter(self, score):
         """تحويل المعدل إلى تقدير"""
-        if score >= 90: return "ممتاز"
-        elif score >= 80: return "جيد جداً"
-        elif score >= 70: return "جيد"
-        elif score >= 60: return "مقبول"
+        if score >= 270: return "ممتاز"
+        elif score >= 240: return "جيد جداً"
+        elif score >= 210: return "جيد"
+        elif score >= 180: return "مقبول"
         else: return "راسب"
 
 
@@ -1546,9 +1555,9 @@ class Main(QtWidgets.QMainWindow):
                 self.tableWidget_13.setItem(row, 3, QtWidgets.QTableWidgetItem(str(final_total)))
                 avg_item = QtWidgets.QTableWidgetItem(f"{average:.2f}")
                 # تحديد اللون حسب المتوسط
-                if average >= 90:
+                if average >= 270:
                     avg_item.setBackground(QtGui.QColor("lightgreen"))  # ممتاز
-                elif average >= 50:
+                elif average >= 150:
                     avg_item.setBackground(QtGui.QColor("khaki"))       # مقبول
                 else:
                     avg_item.setBackground(QtGui.QColor("salmon"))      # راسب
