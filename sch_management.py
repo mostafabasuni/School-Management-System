@@ -56,32 +56,33 @@ class Main(QtWidgets.QMainWindow):
         self.checkBox_27,  # permissions_tab
         self.checkBox_21,  # grades_tab
         ]
-    
+        self.result_type = None  # None | 'midterm' | 'final' | 'top_ten'    
         
         self.radioButton.clicked.connect(self.load_students_with_scores)
         self.radioButton_2.clicked.connect(self.load_students_with_scores)
         self.comboBox_16.currentIndexChanged.connect(self.load_students_with_scores)
         
         # عند تغيير الصف
-        self.comboBox_18.currentIndexChanged.connect(self.display_class_results)
+        self.comboBox_18.currentIndexChanged.connect(self.refresh_result_for_selected_grade)
+
 
         # عند تغيير السنة
-        self.comboBox_20.currentIndexChanged.connect(self.display_class_results)
+        self.comboBox_20.currentIndexChanged.connect(self.display_final_results)
 
         # زر التحديث
-        #self.pushButton_refresh.clicked.connect(self.display_class_results)
+        #self.pushButton_refresh.clicked.connect(self.display_final_results)
 
         # زر التصدير
         #self.pushButton_export.clicked.connect(self.export_results)
         
         '''
         self.pushButton_class_top.clicked.connect(
-            lambda: self.display_top_students(current_grade_id))
+            lambda: self.display_top_ten(current_grade_id))
         self.pushButton_school_top.clicked.connect(
-            lambda: self.display_top_students())'''
+            lambda: self.display_top_ten())'''
         self.pushButton_69.clicked.connect(self.upgrade_grade_scores)
         
-        #self.pushButton_display_results.clicked.connect(self.display_class_results)     
+        #self.pushButton_display_results.clicked.connect(self.display_final_results)     
         
         self.tableWidget_5.setColumnHidden(0, True)  # إخفاء العمود الأول (ID)    
         #self.tableWidget_5.cellChanged.connect(self.calculate_totals)
@@ -125,8 +126,11 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_53.clicked.connect(self.handle_grade_delete)
         self.pushButton_67.clicked.connect(self.open_grades_tab)
         self.pushButton_68.clicked.connect(self.print_settings)
+        self.pushButton_70.clicked.connect(self.on_show_final_clicked)
+        self.pushButton_71.clicked.connect(self.on_show_top_ten_clicked)
         self.pushButton_72.clicked.connect(self.final_results_tab)
         self.pushButton_73.clicked.connect(self.print_settings)
+        self.pushButton_74.clicked.connect(self.on_show_midterm_clicked)
         self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
@@ -1013,7 +1017,103 @@ class Main(QtWidgets.QMainWindow):
         grade = student.grade  # الاستفادة من العلاقة المباشرة
         self.lineEdit_28.setText(grade.name)
         self.lineEdit_43.setText(grade.level)
+    
+    def on_show_midterm_clicked(self):
+        self.result_type = 'midterm'
+        self.display_midterm_results()
 
+    def on_show_final_clicked(self):
+        self.result_type = 'final'
+        self.display_final_results()
+
+    def on_show_top_ten_clicked(self):
+        self.result_type = 'top_ten'
+        self.display_top_ten()
+
+    def refresh_result_for_selected_grade(self):
+        if self.result_type == 'midterm':
+            self.display_midterm_results()
+        elif self.result_type == 'final':
+            self.display_final_results()
+        elif self.result_type == 'top_ten':
+            self.display_top_ten()
+
+    def display_midterm_results(self):
+        try:
+            academic_year = self.comboBox_20.currentText()
+            term = self.comboBox_19.currentText()
+            level = self.comboBox_21.currentText()
+            grade_name = self.comboBox_18.currentText()
+            if not (academic_year and term and level and grade_name):
+                QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى اختيار جميع الحقول المطلوبة")
+                return
+            grade_id = Grade.get(
+                (Grade.name == grade_name) & 
+                (Grade.level == level) & 
+                (Grade.term == term) &
+                (Grade.academic_year == academic_year)
+            ).id                    
+            # جلب الطلاب مصنفين مع معلومات الصف
+            students = (Student
+                    .select(Student, Grade)
+                    .join(Grade)
+                    .where(
+                        (Student.grade == grade_id) &
+                        (Student.midterm_total > 0)
+                    )
+                    .order_by(Student.midterm_total.desc()))
+            
+            # إعداد الجدول
+            self.tableWidget_13.setRowCount(0)
+            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
+            headers = [
+                "الترتيب", "كود الطالب", "اسم الطالب", 
+                "درجة نصف العام", "درجة نهاية العام", 
+                "المعدل العام", "التقدير"
+            ]
+            self.tableWidget_13.setHorizontalHeaderLabels(headers)
+            
+            # تعبئة البيانات
+            for row, student in enumerate(students):
+                self.tableWidget_13.insertRow(row)
+                
+                items = [
+                    QtWidgets.QTableWidgetItem(str(row + 1)),
+                    QtWidgets.QTableWidgetItem(student.student_code),
+                    QtWidgets.QTableWidgetItem(student.name),
+                    QtWidgets.QTableWidgetItem(f"{student.midterm_total:.2f}"),
+                    QtWidgets.QTableWidgetItem("-"),
+                    QtWidgets.QTableWidgetItem("-"),
+                    QtWidgets.QTableWidgetItem(self.get_grade_letter(student.midterm_total))
+                ]
+                
+                # تعبئة الخلايا
+                for col, item in enumerate(items):
+                    self.tableWidget_13.setItem(row, col, item)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    
+                    # تنسيق الصفوف الأولى
+                    if row < 3:
+                        item.setBackground(QtGui.QColor(255, 235, 156))  # تأكد من استيراد QtGui
+                    elif student.midterm_total < 50:
+                        item.setBackground(QtGui.QColor(255, 200, 200))
+                    # ضبط إعدادات الجدول
+            self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.tableWidget_13.setSortingEnabled(True)
+            
+            # إضافة إحصاءات أسفل الجدول
+            self.textEdit.setText(
+                f"إحصاءات الصف: {grade_name}\n"
+                f"عدد الطلاب: {students.count()} \n "
+                f"أعلى معدل: {students[0].midterm_total:.2f} \n "
+                f"أقل معدل: {students[-1].midterm_total:.2f} \n "                
+            )
+            
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+    
+    
     def display_student_scores(self, student):
         """عرض درجات الطالب في الجدول"""
         self.tableWidget_6.setRowCount(0)
@@ -1210,18 +1310,22 @@ class Main(QtWidgets.QMainWindow):
 
 # =================== النتائج النهائية =========================
 
-    def display_top_students(self, grade_id=None):
+    def display_top_ten(self, grade_id=None):
         """عرض العشرة الأوائل (لصف معين أو للمدرسة ككل)"""
         try:
+            term = self.comboBox_19.currentText()
+            level = self.comboBox_21.currentText()
+            grade_name = self.comboBox_18.currentText()
             academic_year = self.comboBox_20.currentText()
             
+            grade_id = Grade.get(
+            (Grade.name == grade_name) & 
+            (Grade.level == level) & 
+            (Grade.term == term) &
+            (Grade.academic_year == academic_year)).id            
             if grade_id:
                 rankings = ScoreService.calculate_class_rankings(grade_id, academic_year)
-                title = "أوائل الصف"
-            else:
-                rankings = ScoreService.calculate_school_rankings(academic_year)
-                title = "أوائل المدرسة"
-            
+                title = "أوائل الصف"            
             self.tableWidget_13.setRowCount(0)
             
             for row, record in enumerate(rankings[:10]):  # عرض أول 10 فقط
@@ -1269,7 +1373,7 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", message)
             
             
-    def display_class_results(self):
+    def display_final_results(self):
         """عرض نتائج جميع طلاب الصف مع التصنيف"""
         try:
             academic_year = self.comboBox_20.currentText()
@@ -1284,9 +1388,7 @@ class Main(QtWidgets.QMainWindow):
                 (Grade.level == level) & 
                 (Grade.term == term) &
                 (Grade.academic_year == academic_year)
-            ).id
-            
-                    
+            ).id                    
             # جلب الطلاب مصنفين مع معلومات الصف
             students = (Student
                     .select(Student, Grade)
