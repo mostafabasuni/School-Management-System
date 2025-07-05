@@ -1,4 +1,5 @@
 from sch_management_db import Teacher
+from peewee import DoesNotExist
 
 class TeacherService:
     def __init__(self):
@@ -7,13 +8,17 @@ class TeacherService:
     @staticmethod
     def create_teacher(t_code, name, subject):
         try:            
-            return {Teacher.create(teacher_code=t_code, 
+            teacher = Teacher.create(teacher_code=t_code, 
                             name=name, 
-                            specialization=subject)}
+                            specialization=subject)        
+            return True, "تم حفظ المدرس بنجاح"
+        except DoesNotExist:
+            return False, "المدرس غير موجود"
         except Exception as e:
-            print(f"Error creating teacher: {e}")
-            return None
-    
+            return False, f"خطأ تكرار بيانات"
+        
+        
+        
     def update_teacher(self, id, teacher_code, name, subject):
         try:
             teacher = Teacher.get(Teacher.id == id)

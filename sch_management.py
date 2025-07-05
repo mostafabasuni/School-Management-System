@@ -210,15 +210,14 @@ class Main(QtWidgets.QMainWindow):
         password = self.lineEdit_7.text().strip()
         job = self.lineEdit_5.text().strip()
         is_admin = self.checkBox.isChecked()
-
-        if not fullname or not username or not password or not job:
+        if not all([fullname, username, password, job]):        
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
-            return
+            return        
 
-        user = UserManager.create_user(fullname, username, password, job, is_admin)
+        success, message = UserManager.create_user(fullname, username, password, job, is_admin)
 
-        if user:
-            QtWidgets.QMessageBox.information(self, "نجاح", "تم إنشاء المستخدم بنجاح.")
+        if success:
+            QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.lineEdit_3.clear()
             self.lineEdit_4.clear()
             self.lineEdit_5.clear()
@@ -227,7 +226,7 @@ class Main(QtWidgets.QMainWindow):
             self.checkBox.setChecked(False)
             self.load_users()  # إعادة تحميل المستخدمين بعد الإضافة
         else:
-            QtWidgets.QMessageBox.critical(self, "خطأ", "فشل في إنشاء المستخدم.")
+            QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
     def open_users_tab(self):
         self.tabWidget.setCurrentIndex(1)    
@@ -316,16 +315,20 @@ class Main(QtWidgets.QMainWindow):
         t_code = self.lineEdit_9.text().strip()
         teacher_name = self.lineEdit_10.text().strip()
         subject = self.lineEdit_11.text().strip()        
-        if not t_code or not teacher_name or not subject:
+        if not all([t_code, teacher_name, subject]):        
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
             return        
-        if TeacherService.create_teacher(t_code, teacher_name, subject):
-            QtWidgets.QMessageBox.information(self, "نجاح", "تم إضافة المعلم بنجاح.")
+        success, message = TeacherService.create_teacher(t_code, teacher_name, subject)
+        if success:
+            QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.lineEdit_9.clear()
             self.lineEdit_10.clear()
             self.lineEdit_11.clear()
             self.load_teachers()
             self.setup_courses_tab()  # إعادة تحميل الدورات بعد إضافة معلم جديد
+        else:
+            QtWidgets.QMessageBox.critical(self, "خطأ", message)
+
 
     def handle_teacher_update(self):
         selected_row = self.tableWidget_2.currentRow()
@@ -465,12 +468,13 @@ class Main(QtWidgets.QMainWindow):
         self.tableWidget_3.setRowCount(0)
         for row_index, course in enumerate(Course.select()):
             self.tableWidget_3.insertRow(row_index)
-            self.tableWidget_3.setItem(row_index, 0, QtWidgets.QTableWidgetItem(course.course_code))
-            self.tableWidget_3.setItem(row_index, 1, QtWidgets.QTableWidgetItem(course.name))
-            self.tableWidget_3.setItem(row_index, 2, QtWidgets.QTableWidgetItem(course.grade.name))
-            self.tableWidget_3.setItem(row_index, 3, QtWidgets.QTableWidgetItem(course.grade.level if course.grade else ""))
-            self.tableWidget_3.setItem(row_index, 4, QtWidgets.QTableWidgetItem(course.grade.term if course.grade else ""))
-            self.tableWidget_3.setItem(row_index, 5, QtWidgets.QTableWidgetItem(course.teacher.name if course.teacher else ""))
+            self.tableWidget_3.setItem(row_index, 0, QtWidgets.QTableWidgetItem(course.id))
+            self.tableWidget_3.setItem(row_index, 1, QtWidgets.QTableWidgetItem(course.course_code))
+            self.tableWidget_3.setItem(row_index, 2, QtWidgets.QTableWidgetItem(course.name))
+            self.tableWidget_3.setItem(row_index, 3, QtWidgets.QTableWidgetItem(course.grade.name))
+            self.tableWidget_3.setItem(row_index, 4, QtWidgets.QTableWidgetItem(course.grade.level if course.grade else ""))
+            self.tableWidget_3.setItem(row_index, 5, QtWidgets.QTableWidgetItem(course.grade.term if course.grade else ""))
+            self.tableWidget_3.setItem(row_index, 6, QtWidgets.QTableWidgetItem(course.teacher.name if course.teacher else ""))
 
     def handle_course_creation(self):
         course_code = self.lineEdit_14.text().strip()
@@ -573,10 +577,10 @@ class Main(QtWidgets.QMainWindow):
         
         try:
             # جلب البيانات من الجدول
-            course_code = self.tableWidget_3.item(selected_row, 0).text()
-            course_name = self.tableWidget_3.item(selected_row, 1).text()
-            grade_name = self.tableWidget_3.item(selected_row, 2).text()
-            teacher_name = self.tableWidget_3.item(selected_row, 5).text()
+            course_code = self.tableWidget_3.item(selected_row, 1).text()
+            course_name = self.tableWidget_3.item(selected_row, 2).text()
+            grade_name = self.tableWidget_3.item(selected_row, 3).text()
+            teacher_name = self.tableWidget_3.item(selected_row, 6).text()
             
             # تعبئة الحقول في الواجهة
             self.lineEdit_14.setText(course_code)
@@ -601,40 +605,36 @@ class Main(QtWidgets.QMainWindow):
         try:
             selected_row = self.tableWidget_3.currentRow()
             if selected_row == -1:
-                QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار مادة من الجدول")
+                QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
                 return
+            course_id = int(self.tableWidget_3.item(selected_row, 0).text())
+            print(f"Selected Course ID: {course_id}")  # Debugging line
             
             # جلب البيانات من الواجهة
-            old_course_code = self.tableWidget_3.item(selected_row, 0).text()  # ID الأصلي من الجدول
-            new_course_code = self.lineEdit_14.text().strip()
+            course_code = self.lineEdit_14.text().strip()
             course_name = self.lineEdit_15.text().strip()
             teacher_code = self.comboBox_7.currentData()
             grade_name = self.comboBox_8.currentText()
             level = self.comboBox_9.currentText()
             term = self.comboBox_10.currentText()
-
+            # التحقق من الحقول الإجبارية
+            if not all([course_code, course_name]):
+                QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول الإجبارية")
+                return
             # الحصول على grade_code من الجداول المرتبطة
             grade = Grade.get(
                 (Grade.name == grade_name) & 
                 (Grade.level == level) & 
                 (Grade.term == term))
-            grade_code = grade.grade_code
-
-            '''grade = Grade.select().where(
-                (Grade.name == grade_name) &
-                (Grade.level == level) &
-                (Grade.term == term)).get()'''
-            # التحقق من الحقول الإجبارية
-            if not all([new_course_code, course_name, grade_code]):
-                QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول الإجبارية")
-                return
-
+            
+            teacher = Teacher.get(Teacher.teacher_code == teacher_code) if teacher_code else None
             # استدعاء دالة التحديث
             success, message = self.course_manager.update_course(
-                course_code=old_course_code,  # نستخدم ID الأصلي للبحث
+                course_id=course_id,  # نستخدم ID الأصلي للبحث
+                course_code=course_code,  # نستخدم ID الأصلي للبحث
                 name=course_name,
-                grade_code=grade_code,
-                teacher_code=teacher_code
+                grade_id=grade.id,
+                teacher_id=teacher.id
             )
 
             if success:
@@ -645,7 +645,7 @@ class Main(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
         except DoesNotExist:
-            QtWidgets.QMessageBox.critical(self, "خطأ", "الصف المحدد غير موجود")
+            QtWidgets.QMessageBox.critical(self, "خطأ", message)
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
         

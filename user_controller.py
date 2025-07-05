@@ -1,5 +1,6 @@
 
 from sch_management_db import User, Teacher, Permissions # استيراد الجداول من Peewee
+from peewee import DoesNotExist
 import bcrypt
 
 class UserManager:
@@ -44,10 +45,11 @@ class UserManager:
                 job=job,
                 is_admin=is_admin
             )
-            return user
+            return True, "تم إنشاء المادة الدراسية بنجاح"
+        except DoesNotExist:
+            return False, "المدرس أو الصف غير موجود"
         except Exception as e:
-            print(f"Error creating user: {e}")
-            return None
+            return False, "خطأ تكرار بيانات"
 
     @staticmethod
     def get_all_users():

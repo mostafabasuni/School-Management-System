@@ -1098,6 +1098,11 @@
        <property name="text">
         <string>رقم المادة</string>
        </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>كود المادة</string>
+       </property>
        <property name="font">
         <font>
          <family>Tajawal</family>
