@@ -15,34 +15,31 @@ class StudentService:
             )
             return True, "تم تسجيل الطالب بنجاح"
         except DoesNotExist:
-            return False, "الصف المحدد غير موجود"
-        except IntegrityError as e:
-            if "Duplicate entry" in str(e):
-                return False, "هذاالطالب تم تسجيله مسبقاً"
-            return False, f"خطأ في قاعدة البيانات: {str(e)}"
+            return False, "الطالب المحدد غير موجود"
+        except Exception as e:
+            return False, f"خطأ تكرار بيانات"
         
     @staticmethod
-    def student_update(student_id, name, age, grade_id, registration_date):
-        print(f"Updating student: {student_id}, {name}, {age}, {grade_id}")
+    def student_update(student_id, student_code, name, age, grade_id, registration_date):
+        
         try:
-            student = Student.get(Student.student_id == student_id)
-            if name is not None:
-                student.name = name
-            if age is not None:
-                student.age = age
-            if grade_id is not None:
-                student.grade = grade_id  # سيتم تحويله تلقائياً لكائن Grade
+            student = Student.get(Student.id == student_id)            
+            student.student_code = student_code
+            student.name = name            
+            student.age = age            
+            student.grade_id = grade_id  # سيتم تحويله تلقائياً لكائن Grade
+            student.registration_date = registration_date
             student.save()
             return True, "تم تحديث بيانات الطالب بنجاح"
         except DoesNotExist:
             return False, "الطالب غير موجود"
         except IntegrityError as e:
-            return False, f"خطأ في قاعدة البيانات: {str(e)}"
+            return False, f"حدث خطأ أثناء التحديث"
     
     @staticmethod    
     def student_delete(student_id):
         try:
-            student = Student.get(Student.student_id == student_id)
+            student = Student.get(Student.id == student_id)
             student.delete_instance()
             return True, "تم حذف الطالب بنجاح"
         except DoesNotExist:

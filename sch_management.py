@@ -58,9 +58,9 @@ class Main(QtWidgets.QMainWindow):
         ]
         self.result_type = None  # None | 'midterm' | 'final' | 'top_ten'    
         
-        self.radioButton.clicked.connect(self.load_students_with_scores)
-        self.radioButton_2.clicked.connect(self.load_students_with_scores)
-        self.comboBox_16.currentIndexChanged.connect(self.load_students_with_scores)
+        self.radioButton.clicked.connect(self.midterm_scores)
+        self.radioButton_2.clicked.connect(self.final_scores)
+        self.comboBox_16.currentIndexChanged.connect(self.final_scores)
         
         # عند تغيير الصف
         self.comboBox_18.currentIndexChanged.connect(self.refresh_result_for_selected_grade)
@@ -378,12 +378,11 @@ class Main(QtWidgets.QMainWindow):
         for row_index, grade in enumerate(Grade.select()):
             self.tableWidget_9.insertRow(row_index)
             self.tableWidget_9.setItem(row_index, 0, QtWidgets.QTableWidgetItem(str(grade.id)))
-            self.tableWidget_9.setItem(row_index, 1, QtWidgets.QTableWidgetItem(grade.term))
-            self.tableWidget_9.setItem(row_index, 2, QtWidgets.QTableWidgetItem(grade.level))
-            self.tableWidget_9.setItem(row_index, 3, QtWidgets.QTableWidgetItem(grade.name))
-            self.tableWidget_9.setItem(row_index, 4, QtWidgets.QTableWidgetItem(grade.grade_code))
-    
-    
+            self.tableWidget_9.setItem(row_index, 1, QtWidgets.QTableWidgetItem(grade.grade_code))
+            self.tableWidget_9.setItem(row_index, 2, QtWidgets.QTableWidgetItem(grade.academic_year))
+            self.tableWidget_9.setItem(row_index, 3, QtWidgets.QTableWidgetItem(grade.term))
+            self.tableWidget_9.setItem(row_index, 4, QtWidgets.QTableWidgetItem(grade.level))
+            self.tableWidget_9.setItem(row_index, 5, QtWidgets.QTableWidgetItem(grade.name))    
     
     def open_grades_tab(self):
         self.tabWidget.setCurrentIndex(4)
@@ -394,25 +393,29 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار صف من الجدول")
             return
 
-        grade_code = int(self.tableWidget_9.item(selected_row, 0).text())
-        grade = Grade.get_by_id(grade_code)
+        grade_id = int(self.tableWidget_9.item(selected_row, 0).text())
+        grade = Grade.get_by_id(grade_id)
         self.lineEdit_44.setText(grade.grade_code)
         self.lineEdit_48.setText(grade.name)
         self.lineEdit_47.setText(grade.level)
         self.lineEdit_46.setText(grade.term)
+        self.lineEdit_61.setText(grade.academic_year)  # إضافة حقل السنة الأكاديمية
         
     def handle_grade_creation(self):
         grade_code = self.lineEdit_44.text().strip()
         grade_name = self.lineEdit_48.text().strip()
         level = self.lineEdit_47.text().strip()
         term = self.lineEdit_46.text().strip()
+        year = self.lineEdit_61.text().strip()
         
-        if not grade_code or not grade_name or not level or not term:
+        if not all([grade_code, grade_name, level, term, year]):
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
             return
-        if self.grade_manager.create_grade(grade_code, grade_name, level, term):
-            QtWidgets.QMessageBox.information(self, "نجاح", "تم إضافة الصف بنجاح.")
-        
+        success, message = self.grade_manager.create_grade(grade_code, grade_name, level, term, year)
+        if success:
+            QtWidgets.QMessageBox.information(self, "نجاح", message)
+        else:
+            QtWidgets.QMessageBox.critical(self, "خطأ", message)        
         self.load_grades()  # إعادة تحميل الصفوف بعد الإضافة
         self.clear_grade_form()
         
@@ -422,12 +425,13 @@ class Main(QtWidgets.QMainWindow):
         if selected_row == -1:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار صف من الجدول")
             return
-        id_ = int(self.tableWidget_9.item(selected_row, 0).text())
+        grade_id = int(self.tableWidget_9.item(selected_row, 0).text())
         grade_code = self.lineEdit_44.text().strip()
         grade_name = self.lineEdit_48.text().strip()
         level = self.lineEdit_47.text().strip()
         term = self.lineEdit_46.text().strip()
-        success, message = self.grade_manager.update_grade(id_, grade_code, grade_name, level, term)
+        year = self.lineEdit_61.text().strip()
+        success, message = self.grade_manager.update_grade(grade_id, grade_code, grade_name, level, term, year)
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.load_grades()
@@ -439,7 +443,7 @@ class Main(QtWidgets.QMainWindow):
         if selected_row == -1:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار صف من الجدول")
             return
-        id_ = int(self.tableWidget_9.item(selected_row, 0).text())
+        grade_id = int(self.tableWidget_9.item(selected_row, 0).text())
         reply = QtWidgets.QMessageBox.question(
             self,
             "تأكيد الحذف",
@@ -447,7 +451,7 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
         )
         if reply == QtWidgets.QMessageBox.Yes:
-            success, message = self.grade_manager.delete_grade(id_)
+            success, message = self.grade_manager.delete_grade(grade_id)
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
                 self.load_grades()
@@ -460,6 +464,7 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_48.clear()
         self.lineEdit_47.clear()
         self.lineEdit_46.clear()
+        self.lineEdit_61.clear()
 # =================== Courses =========================
     def open_courses_tab(self):
         self.tabWidget.setCurrentIndex(3)
@@ -468,7 +473,7 @@ class Main(QtWidgets.QMainWindow):
         self.tableWidget_3.setRowCount(0)
         for row_index, course in enumerate(Course.select()):
             self.tableWidget_3.insertRow(row_index)
-            self.tableWidget_3.setItem(row_index, 0, QtWidgets.QTableWidgetItem(course.id))
+            self.tableWidget_3.setItem(row_index, 0, QtWidgets.QTableWidgetItem(str(course.id)))
             self.tableWidget_3.setItem(row_index, 1, QtWidgets.QTableWidgetItem(course.course_code))
             self.tableWidget_3.setItem(row_index, 2, QtWidgets.QTableWidgetItem(course.name))
             self.tableWidget_3.setItem(row_index, 3, QtWidgets.QTableWidgetItem(course.grade.name))
@@ -602,13 +607,12 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
                 
     def handle_course_update(self):
-        try:
+        try:            
             selected_row = self.tableWidget_3.currentRow()
             if selected_row == -1:
                 QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار معلم من الجدول")
                 return
-            course_id = int(self.tableWidget_3.item(selected_row, 0).text())
-            print(f"Selected Course ID: {course_id}")  # Debugging line
+            course_id = int(self.tableWidget_3.item(selected_row, 0).text())            
             
             # جلب البيانات من الواجهة
             course_code = self.lineEdit_14.text().strip()
@@ -630,8 +634,8 @@ class Main(QtWidgets.QMainWindow):
             teacher = Teacher.get(Teacher.teacher_code == teacher_code) if teacher_code else None
             # استدعاء دالة التحديث
             success, message = self.course_manager.update_course(
-                course_id=course_id,  # نستخدم ID الأصلي للبحث
-                course_code=course_code,  # نستخدم ID الأصلي للبحث
+                course_id=course_id, 
+                course_code=course_code,  
                 name=course_name,
                 grade_id=grade.id,
                 teacher_id=teacher.id
@@ -655,16 +659,14 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار مادة من الجدول")
             return
         
-        course_code = self.tableWidget_3.item(selected_row, 0).text()
-        c_id = Course.get(Course.course_code == course_code).id
-        
+        course_id = int(self.tableWidget_3.item(selected_row, 0).text())        
         reply = QtWidgets.QMessageBox.question(
             self, "تأكيد", "هل أنت متأكد من حذف هذه المادة؟",
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
         )
         
         if reply == QtWidgets.QMessageBox.Yes:
-            success, message = self.course_manager.delete_course(c_code)
+            success, message = self.course_manager.delete_course(course_id)
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
                 self.load_courses()
@@ -728,7 +730,8 @@ class Main(QtWidgets.QMainWindow):
         if selected_row == -1:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار طالب من الجدول")
             return        
-        student_code = self.tableWidget_4.item(selected_row, 0).text()
+        student_id = self.tableWidget_4.item(selected_row, 0).text()
+        student_code = self.lineEdit_18.text().strip()
         name = self.lineEdit_19.text().strip()
         age = self.spinBox.value()
         grade_name = self.comboBox_11.currentText()
@@ -742,10 +745,11 @@ class Main(QtWidgets.QMainWindow):
             return
 
         success, message = self.student_manager.student_update(
+            student_id=student_id,
             student_code=student_code,
             name=name,
             age=age,
-            grade_code=grade.id,  # إرسال ID الصف فقط
+            grade_id=grade.id,  # إرسال ID الصف فقط
             registration_date=reg_date
         )
 
@@ -762,7 +766,7 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار طالب من الجدول")
             return
         
-        student_code = self.tableWidget_4.item(selected_row, 0).text()
+        student_id = self.tableWidget_4.item(selected_row, 0).text()
         reply = QtWidgets.QMessageBox.question(
             self,
             "تأكيد الحذف",
@@ -771,7 +775,7 @@ class Main(QtWidgets.QMainWindow):
         )
     
         if reply == QtWidgets.QMessageBox.Yes:
-            success, message = self.student_manager.student_delete(student_code)
+            success, message = self.student_manager.student_delete(student_id)
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
                 self.load_students()
@@ -785,8 +789,8 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار طالب من الجدول")
             return
 
-        student_code = self.tableWidget_4.item(selected_row, 0).text()
-        student = Student.get(Student.student_code == student_code)        
+        student_id = self.tableWidget_4.item(selected_row, 0).text()
+        student = Student.get(Student.id == student_id)        
         self.lineEdit_18.setText(student.student_code)
         self.lineEdit_19.setText(student.name)
         self.spinBox.setValue(student.age)
@@ -810,12 +814,13 @@ class Main(QtWidgets.QMainWindow):
         for row, student in enumerate(Student.select()):
         
             self.tableWidget_4.insertRow(row)
-            self.tableWidget_4.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
-            self.tableWidget_4.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
-            self.tableWidget_4.setItem(row, 2, QtWidgets.QTableWidgetItem(str(student.age)))
-            self.tableWidget_4.setItem(row, 3, QtWidgets.QTableWidgetItem(student.grade.name))
-            self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.level))
-            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
+            self.tableWidget_4.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))
+            self.tableWidget_4.setItem(row, 1, QtWidgets.QTableWidgetItem(student.student_code))
+            self.tableWidget_4.setItem(row, 2, QtWidgets.QTableWidgetItem(student.name))
+            self.tableWidget_4.setItem(row, 3, QtWidgets.QTableWidgetItem(str(student.age)))
+            self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.name))
+            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(student.grade.level))
+            self.tableWidget_4.setItem(row, 6, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
     # =================== Students End =========================        
     # =================== scores =========================
     def open_scores_tab(self):
@@ -883,7 +888,7 @@ class Main(QtWidgets.QMainWindow):
 
             if success:
                 QtWidgets.QMessageBox.information(self, "نجاح", message)
-                self.load_students_with_scores()  # عرض الدرجات المحفوظة
+                self.final_scores()  # عرض الدرجات المحفوظة
             else:
                 QtWidgets.QMessageBox.critical(self, "خطأ", message)
 
@@ -895,10 +900,9 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
         
     
-    def load_students_with_scores(self):
+    def final_scores(self):
         try:
             self.tableWidget_5.setRowCount(0)
-
             course_name = self.comboBox.currentText()
             academic_year = self.comboBox_16.currentText()
             grade_name = self.comboBox_13.currentText()
@@ -949,7 +953,48 @@ class Main(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")
 
-        
+    def midterm_scores(self):
+        try:
+            self.tableWidget_5.setRowCount(0)
+            course_name = self.comboBox.currentText()
+            academic_year = self.comboBox_16.currentText()
+            grade_name = self.comboBox_13.currentText()
+            level = self.comboBox_14.currentText()
+
+            if not (course_name and academic_year and grade_name and level):
+                QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار كل الحقول المطلوبة")
+                return
+
+            # جلب الصف والمادة
+            grade = Grade.get(Grade.name == grade_name, Grade.level == level)
+            course = Course.get(Course.name == course_name, Course.grade == grade.id)
+            self.lineEdit_23.setText(course.course_code)
+
+            # جلب كل الطلاب في الصف
+            students = Student.select().where(Student.grade == grade)
+
+            for row, student in enumerate(students):
+                self.tableWidget_5.insertRow(row)
+                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+
+                # محاولة جلب الدرجات إن وُجدت
+                try:
+                    score = StudentScore.get(
+                        (StudentScore.student == student) &
+                        (StudentScore.course == course) &
+                        (StudentScore.academic_year == academic_year)
+                    )
+                    mid = score.midterm_score                    
+                except StudentScore.DoesNotExist:
+                    mid = None
+
+                # إدراج الدرجات في الجدول
+                self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(mid if mid is not None else "")))
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")
+            
+    
     def calculate_totals(self):
         #حساب الدرجات النهائية وعرضها
         for row in range(self.tableWidget_5.rowCount()):

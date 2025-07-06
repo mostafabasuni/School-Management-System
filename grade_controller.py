@@ -5,22 +5,25 @@ class GradeService:
         pass
 
     
-    def create_grade(self, grade_id, name, level, section):
+    def create_grade(self, grade_code, name, level, term, academic_year):
         try:
-            return {Grade.create(grade_id=grade_id,
+            Grade.create(grade_code=grade_code,
                     name=name,
                     level=level,
-                    section=section)}
+                    term=term,
+                    academic_year=academic_year)
+            return True, "تم إنشاء الصف بنجاح"
         except Exception as e:
-            return False, f"خطأ في إنشاء المادة: {str(e)}"
+            return False, f"خطأ تكرار بيانات"
 
-    def update_grade(self, id, grade_id, name, level, section):
+    def update_grade(self, grade_id, grade_code, name, level, term, academic_year):
         try:
-            grade = Grade.get(Grade.id == id)
-            grade.grade_id = grade_id
+            grade = Grade.get(Grade.id == grade_id)
+            grade.grade_code = grade_code
             grade.name = name
             grade.level = level
-            grade.section = section
+            grade.term = term
+            grade.academic_year = academic_year
             grade.save()
             return True, "تم تحديث بيانات الصف بنجاح"
         except Grade.DoesNotExist:

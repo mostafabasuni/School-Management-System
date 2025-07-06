@@ -26,12 +26,7 @@ class CourseService:
     def update_course(course_id,course_code, name, grade_id, teacher_id=None):
         try:
             # التحقق من وجود المادة الدراسية
-            course = Course.get(Course.course_id == course_id)
-            
-            # التحقق من وجود الصف والمدرس (إذا كان معطى)
-            grade = Grade.get(Grade.grade_id == grade_id)
-            teacher = Teacher.get(Teacher.teacher_id == teacher_id) if teacher_id else None
-            
+            course = Course.get(Course.id == course_id)
             # تحديث البيانات
             course.course_code = course_code
             course.name = name
@@ -44,7 +39,7 @@ class CourseService:
         except DoesNotExist:
             return False, "المادة أو الصف أو المدرس غير موجود"
         except Exception as e:
-            return False, "خطأ تكرار بيانات"
+            return False, "حدث خطأ أثناء التحديث"
 
     @staticmethod
     def delete_course(course_id):
