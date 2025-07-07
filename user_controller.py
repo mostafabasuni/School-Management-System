@@ -45,9 +45,9 @@ class UserManager:
                 job=job,
                 is_admin=is_admin
             )
-            return True, "تم إنشاء المادة الدراسية بنجاح"
+            return True, "تم حفظ بيانات المستخدم بنجاح"
         except DoesNotExist:
-            return False, "المدرس أو الصف غير موجود"
+            return False, "المستخدم غير موجود"
         except Exception as e:
             return False, "خطأ تكرار بيانات"
 

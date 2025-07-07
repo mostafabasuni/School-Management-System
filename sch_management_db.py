@@ -78,7 +78,7 @@ class Permissions(BaseModel):
     courses_tab = BooleanField()
     grades_tab = BooleanField()
     students_tab = BooleanField()
-    scores_tab = BooleanField()
+    score_tab = BooleanField()
     student_score_tab = BooleanField()
     final_results_tab = BooleanField()
     permissions_tab = BooleanField()

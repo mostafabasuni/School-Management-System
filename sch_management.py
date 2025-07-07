@@ -51,10 +51,11 @@ class Main(QtWidgets.QMainWindow):
         self.checkBox_18,  # teachers_tab
         self.checkBox_16,  # courses_tab
         self.checkBox_25,  # students_tab
-        self.checkBox_26,  # scores_tab
+        self.checkBox_26,  # score_tab
         self.checkBox_28,  # student_score_tab
         self.checkBox_27,  # permissions_tab
         self.checkBox_21,  # grades_tab
+        self.checkBox_33,  # final_results_tab
         ]
         self.result_type = None  # None | 'midterm' | 'final' | 'top_ten'    
         
@@ -189,7 +190,7 @@ class Main(QtWidgets.QMainWindow):
                     self.pushButton_67.setEnabled(True)
                 if p.students_tab:
                     self.pushButton_4.setEnabled(True)
-                if p.scores_tab:
+                if p.score_tab:
                     self.pushButton_5.setEnabled(True)
                 if p.student_score_tab:
                     self.pushButton_36.setEnabled(True)
@@ -1534,9 +1535,9 @@ class Main(QtWidgets.QMainWindow):
                 teachers_tab = 1
                 courses_tab = 1
                 students_tab = 1
-                student_scores_tab = 1
+                student_score_tab = 1
                 grades_tab = 1
-                scorses_tab = 1
+                score_tab = 1
                 final_results_tab = 1
                 permissions_tab = 1
             else:
@@ -1545,8 +1546,8 @@ class Main(QtWidgets.QMainWindow):
                 students_tab = 1 if self.checkBox_25.isChecked() else 0
                 courses_tab = 1 if self.checkBox_16.isChecked() else 0
                 grades_tab = 1 if self.checkBox_21.isChecked() else 0
-                scorses_tab = 1 if self.checkBox_26.isChecked() else 0
-                student_scores_tab = 1 if self.checkBox_28.isChecked() else 0
+                score_tab = 1 if self.checkBox_26.isChecked() else 0
+                student_score_tab = 1 if self.checkBox_28.isChecked() else 0
                 final_results_tab = 1 if self.checkBox_33.isChecked() else 0
                 permissions_tab = 1 if self.checkBox_27.isChecked() else 0
 
@@ -1558,8 +1559,8 @@ class Main(QtWidgets.QMainWindow):
                     "students_tab": students_tab,
                     "courses_tab": courses_tab,
                     "grades_tab": grades_tab,
-                    "scorses_tab": scorses_tab,
-                    "student_scores_tab": student_scores_tab,
+                    "score_tab": score_tab,
+                    "student_score_tab": student_score_tab,
                     "final_results_tab": final_results_tab,
                     "permissions_tab": permissions_tab
                 }
@@ -1571,8 +1572,8 @@ class Main(QtWidgets.QMainWindow):
                 permission.students_tab = students_tab
                 permission.courses_tab = courses_tab
                 permission.grades_tab = grades_tab
-                permission.scorses_tab = scorses_tab
-                permission.student_scores_tab = student_scores_tab
+                permission.score_tab = score_tab
+                permission.student_score_tab = student_score_tab
                 permission.final_results_tab = final_results_tab
                 permission.permissions_tab = permissions_tab
                 permission.save()
@@ -1595,7 +1596,7 @@ class Main(QtWidgets.QMainWindow):
             self.pushButton_2.setEnabled(permission.teachers_tab)
             self.pushButton_3.setEnabled(permission.courses_tab)
             self.pushButton_4.setEnabled(permission.students_tab)
-            self.pushButton_5.setEnabled(permission.scores_tab)
+            self.pushButton_5.setEnabled(permission.score_tab)
             self.pushButton_6.setEnabled(permission.permissions_tab)
             self.pushButton_36.setEnabled(permission.student_score_tab)
             self.pushButton_67.setEnabled(permission.grades_tab)
@@ -1626,10 +1627,13 @@ class Main(QtWidgets.QMainWindow):
             self.checkBox_16.setChecked(permission.courses_tab)
             self.checkBox_21.setChecked(permission.grades_tab)
             self.checkBox_28.setChecked(permission.student_score_tab)
-            self.checkBox_26.setChecked(permission.scores_tab)
+            self.checkBox_26.setChecked(permission.score_tab)
             self.checkBox_27.setChecked(permission.permissions_tab)
+            self.checkBox_33.setChecked(permission.final_results_tab)
         except Permissions.DoesNotExist:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "لا توجد صلاحيات محددة لهذا المستخدم")
+            for cb in self.permission_checkboxes:
+                cb.setChecked(False)
         except User.DoesNotExist:
             QtWidgets.QMessageBox.warning(self, "تنبيه", "المستخدم غير موجود")
     
