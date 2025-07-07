@@ -86,15 +86,6 @@ class Permissions(BaseModel):
 db.connect()
 db.create_tables([User, Student, Teacher, Grade, Course, StudentScore, Permissions])
 # Close the database connection when done
-'''student = Student()
-student.student_code = "ST1Prime1"
-student.name = "Ahmed"
-student.age = 10    
-student.grade = Grade.get(Grade.grade_code == "PRIM-1")  # Assuming "PRIM-1" is a valid grade_code
-student.registration_date = datetime.date.today()'''
-
-'''student = Student()
-student.update_totals("2024-2025")'''
 db.close()
 
 

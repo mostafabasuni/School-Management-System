@@ -57,6 +57,20 @@ class Main(QtWidgets.QMainWindow):
         self.checkBox_21,  # grades_tab
         self.checkBox_33,  # final_results_tab
         ]
+        
+        self.nav_buttons = [
+        self.pushButton,
+        self.pushButton_2,
+        self.pushButton_3,
+        self.pushButton_4,
+        self.pushButton_5,
+        self.pushButton_6,
+        self.pushButton_36,  # student_score_tab
+        self.pushButton_67,  # grades_tab
+        self.pushButton_72,  # final_results_tab        
+        ]
+
+        
         self.result_type = None  # None | 'midterm' | 'final' | 'top_ten'    
         
         self.radioButton.clicked.connect(self.midterm_scores)
@@ -134,9 +148,45 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_74.clicked.connect(self.on_show_midterm_clicked)
         self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
+        self.pushButton.clicked.connect(lambda: self.highlight_active_button(self.pushButton))
+        self.pushButton_2.clicked.connect(lambda: self.highlight_active_button(self.pushButton_2))
+        self.pushButton_3.clicked.connect(lambda: self.highlight_active_button(self.pushButton_3))
+        self.pushButton_4.clicked.connect(lambda: self.highlight_active_button(self.pushButton_4))
+        self.pushButton_5.clicked.connect(lambda: self.highlight_active_button(self.pushButton_5))
+        self.pushButton_6.clicked.connect(lambda: self.highlight_active_button(self.pushButton_6))
+        self.pushButton_36.clicked.connect(lambda: self.highlight_active_button(self.pushButton_36))
+        self.pushButton_67.clicked.connect(lambda: self.highlight_active_button(self.pushButton_67))
+        self.pushButton_72.clicked.connect(lambda: self.highlight_active_button(self.pushButton_72))
+
+        
         self.load_users()  # تحميل المستخدمين عند بدء التشغيل
         self.load_teachers()
         self.load_grades()
+    
+    def highlight_active_button(self, active_button):
+        for btn in self.nav_buttons:
+            if btn == active_button:
+                btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #0078d7;
+                        color: white;
+                        font-family: 'Tajawal';
+                        font-size: 11pt;
+                        font-weight: bold;
+                    }
+                """)
+            else:
+                btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: none;
+                        color: black;
+                        font-family: 'Tajawal';
+                        font-size: 11pt;
+                        font-weight: bold;
+                    }
+                """)
+
+    
     def load_users(self):     
         self.tableWidget.setRowCount(0)
         for row_index, user in enumerate(User.select()):
