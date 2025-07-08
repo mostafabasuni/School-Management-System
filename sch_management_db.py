@@ -25,6 +25,7 @@ class Grade(BaseModel):
     id = AutoField(primary_key=True)  # هذا الحقل ضروري
     grade_code = CharField(unique=True)  # مثلاً: "G1", "G2" أو "PRIM-1" للمرحلة الابتدائية
     name = CharField()                 # اسم واضح مثل "الصف الأول الابتدائي"
+    section = IntegerField(null=True)  # الفصل (1, 2, 3, إلخ.)
     level = CharField(null=True)       # المرحلة (ابتدائي/متوسط/ثانوي)
     term = CharField(null=True)     # الفصل الدراسي (الأول - الثاني.)
     academic_year = CharField()

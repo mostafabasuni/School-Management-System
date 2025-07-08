@@ -434,6 +434,8 @@ class Main(QtWidgets.QMainWindow):
             self.tableWidget_9.setItem(row_index, 3, QtWidgets.QTableWidgetItem(grade.term))
             self.tableWidget_9.setItem(row_index, 4, QtWidgets.QTableWidgetItem(grade.level))
             self.tableWidget_9.setItem(row_index, 5, QtWidgets.QTableWidgetItem(grade.name))    
+            self.tableWidget_9.setItem(row_index, 6, QtWidgets.QTableWidgetItem(str(grade.section)))    
+            
     
     def open_grades_tab(self):
         self.tabWidget.setCurrentIndex(4)
@@ -447,6 +449,7 @@ class Main(QtWidgets.QMainWindow):
         grade_id = int(self.tableWidget_9.item(selected_row, 0).text())
         grade = Grade.get_by_id(grade_id)
         self.lineEdit_44.setText(grade.grade_code)
+        self.spinBox_2.setValue(grade.section)  # تعيين قيمة القسم من SpinBox
         self.lineEdit_48.setText(grade.name)
         self.lineEdit_47.setText(grade.level)
         self.lineEdit_46.setText(grade.term)
@@ -455,14 +458,15 @@ class Main(QtWidgets.QMainWindow):
     def handle_grade_creation(self):
         grade_code = self.lineEdit_44.text().strip()
         grade_name = self.lineEdit_48.text().strip()
+        section = self.spinBox_2.value()  # الحصول على قيمة القسم من SpinBox
         level = self.lineEdit_47.text().strip()
         term = self.lineEdit_46.text().strip()
         year = self.lineEdit_61.text().strip()
         
-        if not all([grade_code, grade_name, level, term, year]):
+        if not all([grade_code, grade_name, section, level, term, year]):
             QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى ملء جميع الحقول.")
             return
-        success, message = self.grade_manager.create_grade(grade_code, grade_name, level, term, year)
+        success, message = self.grade_manager.create_grade(grade_code, grade_name, section, level, term, year)
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
         else:
@@ -478,11 +482,12 @@ class Main(QtWidgets.QMainWindow):
             return
         grade_id = int(self.tableWidget_9.item(selected_row, 0).text())
         grade_code = self.lineEdit_44.text().strip()
+        section = self.spinBox_2.value()  # الحصول على قيمة القسم من SpinBox
         grade_name = self.lineEdit_48.text().strip()
         level = self.lineEdit_47.text().strip()
         term = self.lineEdit_46.text().strip()
         year = self.lineEdit_61.text().strip()
-        success, message = self.grade_manager.update_grade(grade_id, grade_code, grade_name, level, term, year)
+        success, message = self.grade_manager.update_grade(grade_id, grade_code, section, grade_name, level, term, year)
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
             self.load_grades()
@@ -516,6 +521,7 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_47.clear()
         self.lineEdit_46.clear()
         self.lineEdit_61.clear()
+        self.spinBox_2.setValue(1)  # إعادة تعيين SpinBox إلى القيمة الافتراضية 1
 # =================== Courses =========================
     def open_courses_tab(self):
         self.tabWidget.setCurrentIndex(3)
@@ -744,12 +750,13 @@ class Main(QtWidgets.QMainWindow):
             student_code = self.lineEdit_18.text().strip()
             name = self.lineEdit_19.text().strip()
             age = self.spinBox.value()
+            section = self.spinBox_3.value()
             grade_name = self.comboBox_11.currentText()
             level = self.comboBox_12.currentText()
             reg_date = self.dateEdit.date().toPyDate()
 
             # الحصول على ID الصف بدلاً من الكائن
-            grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level)            
+            grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level, Grade.section == section)
             if not grade:
                 QtWidgets.QMessageBox.warning(self, "خطأ", "الصف المحدد غير موجود")
                 return
@@ -785,11 +792,12 @@ class Main(QtWidgets.QMainWindow):
         student_code = self.lineEdit_18.text().strip()
         name = self.lineEdit_19.text().strip()
         age = self.spinBox.value()
+        section = self.spinBox_3.value()
         grade_name = self.comboBox_11.currentText()
         level = self.comboBox_12.currentText()
         reg_date = self.dateEdit.date().toPyDate()
         # الحصول على ID الصف بدلاً من الكائن
-        grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level)
+        grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level, Grade.section == section)
         
         if not grade:
             QtWidgets.QMessageBox.warning(self, "خطأ", "الصف المحدد غير موجود")
@@ -845,6 +853,7 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_18.setText(student.student_code)
         self.lineEdit_19.setText(student.name)
         self.spinBox.setValue(student.age)
+        self.spinBox_3.setValue(student.grade.section)  # تعيين القسم من SpinBox
         self.comboBox_11.setCurrentText(student.grade.name)
         self.comboBox_12.setCurrentText(student.grade.level)
         self.dateEdit.setDate(student.registration_date)
@@ -870,8 +879,9 @@ class Main(QtWidgets.QMainWindow):
             self.tableWidget_4.setItem(row, 2, QtWidgets.QTableWidgetItem(student.name))
             self.tableWidget_4.setItem(row, 3, QtWidgets.QTableWidgetItem(str(student.age)))
             self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.name))
-            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(student.grade.level))
-            self.tableWidget_4.setItem(row, 6, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
+            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(str(student.grade.section)))
+            self.tableWidget_4.setItem(row, 6, QtWidgets.QTableWidgetItem(student.grade.level))
+            self.tableWidget_4.setItem(row, 7, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
     # =================== Students End =========================        
     # =================== scores =========================
     def open_scores_tab(self):
@@ -880,10 +890,11 @@ class Main(QtWidgets.QMainWindow):
 
     def load_students_for_scores(self):
         #تحميل الطلاب للصف المحدد
+        section = self.spinBox_3.value()
         grade_name = self.comboBox_13.currentText()
         level = self.comboBox_14.currentText()
         term = self.comboBox_15.currentText()
-        grade_id = Grade.get(Grade.name == grade_name, Grade.level == level, Grade.term == term).id if grade_name and level and term else None        
+        grade_id = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level, Grade.term == term).id if grade_name and section and level and term else None        
         students = Student.select().where(Student.grade == grade_id)
         
         self.tableWidget_5.setRowCount(0)
@@ -958,13 +969,14 @@ class Main(QtWidgets.QMainWindow):
             academic_year = self.comboBox_16.currentText()
             grade_name = self.comboBox_13.currentText()
             level = self.comboBox_14.currentText()
+            section = self.spinBox_4.value()
 
-            if not (course_name and academic_year and grade_name and level):
+            if not (course_name and academic_year and grade_name and section and level):
                 QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار كل الحقول المطلوبة")
                 return
 
             # جلب الصف والمادة
-            grade = Grade.get(Grade.name == grade_name, Grade.level == level)
+            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)
             course = Course.get(Course.name == course_name, Course.grade == grade.id)
             self.lineEdit_23.setText(course.course_code)
 
@@ -1005,29 +1017,32 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")
 
     def midterm_scores(self):
-        try:
+        try:            
             self.tableWidget_5.setRowCount(0)
             course_name = self.comboBox.currentText()
             academic_year = self.comboBox_16.currentText()
             grade_name = self.comboBox_13.currentText()
             level = self.comboBox_14.currentText()
+            section = self.spinBox_4.value()
 
-            if not (course_name and academic_year and grade_name and level):
+            if not (course_name and academic_year and grade_name and section and level):
                 QtWidgets.QMessageBox.warning(self, "تنبيه", "يرجى اختيار كل الحقول المطلوبة")
                 return
 
             # جلب الصف والمادة
-            grade = Grade.get(Grade.name == grade_name, Grade.level == level)
+            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)
+            print("Grade ID:", grade.id)
             course = Course.get(Course.name == course_name, Course.grade == grade.id)
             self.lineEdit_23.setText(course.course_code)
-
+            print("Course:", course.name)
             # جلب كل الطلاب في الصف
             students = Student.select().where(Student.grade == grade)
-
+            print("Students count:", students.count())
             for row, student in enumerate(students):
                 self.tableWidget_5.insertRow(row)
                 self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
                 self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+                print("Student:", student.name)
 
                 # محاولة جلب الدرجات إن وُجدت
                 try:
@@ -1036,7 +1051,11 @@ class Main(QtWidgets.QMainWindow):
                         (StudentScore.course == course) &
                         (StudentScore.academic_year == academic_year)
                     )
-                    mid = score.midterm_score                    
+                    if score is None:
+                        print("No score found for student:", student.name)
+                        mid = None
+                    else:
+                        mid = score.midterm_score                    
                 except StudentScore.DoesNotExist:
                     mid = None
 

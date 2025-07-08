@@ -5,10 +5,11 @@ class GradeService:
         pass
 
     
-    def create_grade(self, grade_code, name, level, term, academic_year):
+    def create_grade(self, grade_code, name, section, level, term, academic_year):
         try:
             Grade.create(grade_code=grade_code,
                     name=name,
+                    section=section,  # إضافة القسم
                     level=level,
                     term=term,
                     academic_year=academic_year)
@@ -16,10 +17,11 @@ class GradeService:
         except Exception as e:
             return False, f"خطأ تكرار بيانات"
 
-    def update_grade(self, grade_id, grade_code, name, level, term, academic_year):
+    def update_grade(self, grade_id, grade_code, section, name, level, term, academic_year):
         try:
             grade = Grade.get(Grade.id == grade_id)
             grade.grade_code = grade_code
+            grade.section = section  # تحديث القسم
             grade.name = name
             grade.level = level
             grade.term = term
