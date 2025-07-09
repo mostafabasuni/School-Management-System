@@ -8,8 +8,8 @@ class CourseService:
             course = Course.create(
                 course_code=course_code,
                 name=name,
-                grade=grade_id,
-                teacher=teacher_id
+                grade_id=grade_id,
+                teacher_id=teacher_id
             )
             return True, "تم إنشاء المادة الدراسية بنجاح"
         except DoesNotExist:

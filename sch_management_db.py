@@ -47,7 +47,7 @@ class Teacher(BaseModel):
     specialization = CharField()
 
 class Course(BaseModel):
-    course_code = CharField(unique=True)
+    course_code = CharField(unique=False)
     name = CharField()
     grade = ForeignKeyField(Grade, backref='courses', on_delete='CASCADE')
     teacher = ForeignKeyField(Teacher, backref='courses_teaching', null=True)

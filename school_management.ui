@@ -1148,12 +1148,7 @@
       </column>
       <column>
        <property name="text">
-        <string>الفصل</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>الصف</string>
+        <string>الفصل الدراسي</string>
        </property>
       </column>
       <column>
@@ -1163,7 +1158,12 @@
       </column>
       <column>
        <property name="text">
-        <string>الفصل الدراسي</string>
+        <string>الصف</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الفصل</string>
        </property>
       </column>
       <column>
