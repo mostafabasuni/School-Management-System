@@ -122,6 +122,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_15.clicked.connect(self.handle_teacher_creation)
         self.pushButton_16.clicked.connect(self.handle_teacher_update)
         self.pushButton_17.clicked.connect(self.handle_teacher_delete)
+        self.pushButton_19.clicked.connect(self.grade_course_search)
         self.pushButton_20.clicked.connect(self.clear_course_form)
         self.pushButton_21.clicked.connect(self.handle_course_creation)
         self.pushButton_22.clicked.connect(self.handle_course_update)
@@ -601,6 +602,7 @@ class Main(QtWidgets.QMainWindow):
         for grade in grades: #Grade.select():            
             self.comboBox_8.addItem(grade.name, grade.grade_code)
             self.comboBox_13.addItem(grade.name, grade.grade_code)
+            self.comboBox_22.addItem(grade.name, grade.grade_code)
             self.comboBox_18.addItem(grade.name, grade.grade_code)
         
         levels = Grade.select(fn.DISTINCT(Grade.level)).where(Grade.level.is_null(False))
@@ -610,6 +612,7 @@ class Main(QtWidgets.QMainWindow):
         for grade in levels:
             self.comboBox_9.addItem(grade.level)
             self.comboBox_14.addItem(grade.level)
+            self.comboBox_17.addItem(grade.level)
             self.comboBox_21.addItem(grade.level)
             
         terms = Grade.select(fn.DISTINCT(Grade.term)).where(Grade.level.is_null(False))
@@ -620,6 +623,7 @@ class Main(QtWidgets.QMainWindow):
             self.comboBox_10.addItem(grade.term)
             self.comboBox_15.addItem(grade.term)
             self.comboBox_19.addItem(grade.term)
+            self.comboBox_23.addItem(grade.term)
         
         courses = Course.select(fn.DISTINCT(Course.name)).where(Course.name.is_null(False))
         self.comboBox.clear()
@@ -728,7 +732,38 @@ class Main(QtWidgets.QMainWindow):
                 self.clear_course_form()
             else:
                 QtWidgets.QMessageBox.warning(self, "خطأ", message)
-                
+    
+    
+    def grade_course_search(self):
+        term = self.comboBox_23.currentText()
+        level = self.comboBox_17.currentText()
+        grade_name = self.comboBox_22.currentText()
+        section = self.spinBox_8.value()
+
+        grade = Grade.get_or_none(
+            (Grade.name == grade_name) &
+            (Grade.level == level) &
+            (Grade.term == term) &
+            (Grade.section == section)
+        )
+
+        if not grade:
+            QtWidgets.QMessageBox.warning(self, "تنبيه", "الصف المحدد غير موجود")
+            return
+
+        self.tableWidget_3.setRowCount(0)
+
+        for row_index, course in enumerate(Course.select().where(Course.grade == grade)):
+            self.tableWidget_3.insertRow(row_index)
+            self.tableWidget_3.setItem(row_index, 0, QtWidgets.QTableWidgetItem(str(course.id)))
+            self.tableWidget_3.setItem(row_index, 1, QtWidgets.QTableWidgetItem(course.course_code))
+            self.tableWidget_3.setItem(row_index, 2, QtWidgets.QTableWidgetItem(course.name))
+            self.tableWidget_3.setItem(row_index, 3, QtWidgets.QTableWidgetItem(course.grade.term))
+            self.tableWidget_3.setItem(row_index, 4, QtWidgets.QTableWidgetItem(course.grade.level))
+            self.tableWidget_3.setItem(row_index, 5, QtWidgets.QTableWidgetItem(course.grade.name))
+            self.tableWidget_3.setItem(row_index, 6, QtWidgets.QTableWidgetItem(str(course.grade.section)))
+            self.tableWidget_3.setItem(row_index, 7, QtWidgets.QTableWidgetItem(course.teacher.name if course.teacher else ""))
+
 # =================== Courses Ends =========================
 
 # =================== Students =========================
@@ -1033,7 +1068,6 @@ class Main(QtWidgets.QMainWindow):
             self.lineEdit_23.setText(course.course_code)            
             # جلب كل الطلاب في الصف
             students = Student.select().where(Student.grade == grade)
-            print("Students count:", students.count())
             for row, student in enumerate(students):
                 self.tableWidget_5.insertRow(row)
                 self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
