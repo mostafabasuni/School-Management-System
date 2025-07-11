@@ -3905,55 +3905,6 @@
      <attribute name="title">
       <string>الدرجات</string>
      </attribute>
-     <widget class="QTableWidget" name="tableWidget_5">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>280</y>
-        <width>871</width>
-        <height>251</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Tajawal</family>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <column>
-       <property name="text">
-        <string>رقم الطالب</string>
-       </property>
-       <property name="font">
-        <font>
-         <family>Tajawal</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>اسم الطالب</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>درجة نصف العام</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>درجة نهاية العام</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>الدرجة النهائية</string>
-       </property>
-      </column>
-     </widget>
      <widget class="QGroupBox" name="groupBox_12">
       <property name="geometry">
        <rect>
@@ -4369,6 +4320,55 @@
         <height>29</height>
        </rect>
       </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidget_5">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>260</y>
+        <width>871</width>
+        <height>251</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Tajawal</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <column>
+       <property name="text">
+        <string>رقم الطالب</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>Tajawal</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>اسم الطالب</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>درجة نصف العام</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>درجة نهاية العام</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الدرجة النهائية</string>
+       </property>
+      </column>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_8">
@@ -5482,7 +5482,6 @@
   <tabstop>lineEdit_19</tabstop>
   <tabstop>pushButton_28</tabstop>
   <tabstop>lineEdit_20</tabstop>
-  <tabstop>tableWidget_5</tabstop>
   <tabstop>pushButton_30</tabstop>
   <tabstop>pushButton_31</tabstop>
   <tabstop>pushButton_32</tabstop>
