@@ -131,11 +131,12 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_25.clicked.connect(self.handle_student_registration)
         self.pushButton_26.clicked.connect(self.handle_student_update)
         self.pushButton_27.clicked.connect(self.handle_student_delete)
+        self.pushButton_28.clicked.connect(self.student_search)
         self.pushButton_29.clicked.connect(self.save_permissions)
         self.pushButton_31.clicked.connect(self.save_course_scores)
         self.pushButton_35.clicked.connect(self.toggle_all_permissions)
         self.pushButton_36.clicked.connect(self.open_student_score_tab)
-        self.pushButton_37.clicked.connect(self.student_search)
+        self.pushButton_37.clicked.connect(self.student_score_search)
         self.pushButton_50.clicked.connect(self.clear_grade_form)
         self.pushButton_51.clicked.connect(self.handle_grade_creation)
         self.pushButton_52.clicked.connect(self.handle_grade_update)
@@ -898,6 +899,38 @@ class Main(QtWidgets.QMainWindow):
         self.comboBox_11.setCurrentText(student.grade.name)
         self.comboBox_12.setCurrentText(student.grade.level)
         self.dateEdit.setDate(student.registration_date)
+    
+    def student_search(self):
+        try:
+            # جلب بيانات البحث
+            student_name = self.lineEdit_20.text().strip()
+            student_code = self.lineEdit_21.text().strip()            
+            # التحقق من المدخلات
+            if not (student_name or student_code):
+                QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى إدخال اسم الطالب أو رقمه")
+                return
+            # البحث باستخدام OR للسماح بالبحث بكلا الحقلين معاً
+            query = Student.select()
+            if student_name and student_code:
+                query = query.where(
+                    (Student.name.contains(student_name)) &
+                    (Student.student_code == student_code)
+                )
+            elif student_name:
+                query = query.where(Student.name.contains(student_name))
+            else:
+                query = query.where(Student.student_code == student_code)
+            student = query.first()
+            if not student:
+                QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد طالب بهذه البيانات")
+                return
+            item = self.tableWidget_4.findItems(str(student.id), Qt.MatchContains)            
+            self.tableWidget_4.setCurrentItem(item[0])
+        except DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "الطالب غير موجود")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
+
             
     def setup_student_tab(self):
                 # تحميل الصفوف في Combobox
@@ -968,7 +1001,6 @@ class Main(QtWidgets.QMainWindow):
             if not all([course, term_type, academic_year, grade, level, section]):
                 QtWidgets.QMessageBox.warning(self, "تحذير", "يجب تعبئة جميع الحقول الإجبارية")
                 return
-
             # الحصول على الـ IDs
             grade_id = Grade.get(Grade.name == grade, Grade.level == level, Grade.section == section).id
             course_id = Course.get(Course.name == course, Course.grade == grade_id).id
@@ -976,13 +1008,9 @@ class Main(QtWidgets.QMainWindow):
             # جمع بيانات الدرجات
             score_data = {}
             for row in range(self.tableWidget_5.rowCount()):
-                student_code = self.tableWidget_5.item(row, 0).text()
-                print("Code: ",student_code)
-                student_code = Student.get(Student.student_code == student_code).id
-                score = float(self.tableWidget_5.item(row, 2 if term_type == "midterm_score" else 3).text())
-            
-                score_data[student_code] = score
-
+                student_id = self.tableWidget_5.item(row, 0).text()
+                score = float(self.tableWidget_5.item(row, 2 if term_type == "midterm_score" else 3).text())            
+                score_data[student_id] = score
             # حفظ الدرجات
             success, message = ScoreService.save_scores(
                 course_id=course_id,
@@ -1019,30 +1047,27 @@ class Main(QtWidgets.QMainWindow):
                 return
 
             # جلب الصف والمادة
-            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)
-            course = Course.get(Course.name == course_name, Course.grade == grade.id)
+            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)            
+            course = Course.get(Course.name == course_name, Course.grade_id == grade.id)            
             self.lineEdit_23.setText(course.course_code)
-
             # جلب كل الطلاب في الصف
-            students = Student.select().where(Student.grade == grade)
-
+            students = Student.select().where(Student.grade_id == grade.id)
             for row, student in enumerate(students):
                 self.tableWidget_5.insertRow(row)
-                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))
                 self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
 
                 # محاولة جلب الدرجات إن وُجدت
                 try:
                     score = StudentScore.get(
-                        (StudentScore.student == student) &
-                        (StudentScore.course == course) &
+                        (StudentScore.student_id == student.id) &
+                        (StudentScore.course_id == course.id) &
                         (StudentScore.academic_year == academic_year)
                     )
                     mid = score.midterm_score
                     final = score.final_score
                 except StudentScore.DoesNotExist:
                     mid = final = None
-
                 # إدراج الدرجات في الجدول
                 self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(mid if mid is not None else "")))
                 self.tableWidget_5.setItem(row, 3, QtWidgets.QTableWidgetItem(str(final if final is not None else "")))
@@ -1073,13 +1098,11 @@ class Main(QtWidgets.QMainWindow):
                 return
 
             # جلب الصف والمادة
-            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)            
-            print(grade.id)
-            course = Course.get(Course.name == course_name, Course.grade == grade.id)
-            print(course.id)
+            grade = Grade.get(Grade.name == grade_name, Grade.section == section, Grade.level == level)                        
+            course = Course.get(Course.name == course_name, Course.grade == grade.id)            
             self.lineEdit_23.setText(course.course_code)            
             # جلب كل الطلاب في الصف
-            students = Student.select().where(Student.grade == grade)
+            students = Student.select().where(Student.grade_id == grade.id)
             for row, student in enumerate(students):
                 self.tableWidget_5.insertRow(row)
                 self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))
@@ -1103,8 +1126,7 @@ class Main(QtWidgets.QMainWindow):
                 # إدراج الدرجات في الجدول
                 self.tableWidget_5.setItem(row, 2, QtWidgets.QTableWidgetItem(str(mid if mid is not None else "")))
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")
-            
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء تحميل الدرجات:\n{str(e)}")            
     
     def calculate_totals(self):
         #حساب الدرجات النهائية وعرضها
@@ -1125,17 +1147,15 @@ class Main(QtWidgets.QMainWindow):
         for student in Student.select():
             self.comboBox_2.addItem(student.name)
     
-    def student_search(self):
+    def student_score_search(self):
         try:
             # جلب بيانات البحث
             student_name = self.lineEdit_29.text().strip()
-            student_code = self.lineEdit_30.text().strip()
-            
+            student_code = self.lineEdit_30.text().strip()            
             # التحقق من المدخلات
             if not (student_name or student_code):
                 QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى إدخال اسم الطالب أو رقمه")
                 return
-
             # البحث باستخدام OR للسماح بالبحث بكلا الحقلين معاً
             query = Student.select()
             if student_name and student_code:
@@ -1147,19 +1167,14 @@ class Main(QtWidgets.QMainWindow):
                 query = query.where(Student.name.contains(student_name))
             else:
                 query = query.where(Student.student_code == student_code)
-
             student = query.first()
-
             if not student:
                 QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد طالب بهذه البيانات")
                 return
-
             # عرض بيانات الطالب
-            self.display_student_info(student)
-            
+            self.display_student_info(student)            
             # عرض الدرجات
             self.display_student_scores(student)
-
         except DoesNotExist:
             QtWidgets.QMessageBox.warning(self, "خطأ", "الطالب غير موجود")
         except Exception as e:

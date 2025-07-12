@@ -3472,9 +3472,9 @@
      <widget class="QTableWidget" name="tableWidget_4">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>20</x>
         <y>275</y>
-        <width>881</width>
+        <width>871</width>
         <height>251</height>
        </rect>
       </property>
@@ -3875,15 +3875,15 @@
      <widget class="QPushButton" name="pushButton_28">
       <property name="geometry">
        <rect>
-        <x>470</x>
+        <x>560</x>
         <y>225</y>
         <width>75</width>
-        <height>32</height>
+        <height>30</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <pointsize>14</pointsize>
+        <pointsize>13</pointsize>
        </font>
       </property>
       <property name="text">
@@ -3893,11 +3893,43 @@
      <widget class="QLineEdit" name="lineEdit_20">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>340</x>
         <y>225</y>
         <width>201</width>
-        <height>29</height>
+        <height>30</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>اسم الطالب</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_21">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>225</y>
+        <width>141</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>كود الطالب</string>
       </property>
      </widget>
     </widget>
@@ -4674,7 +4706,7 @@
        <set>Qt::AlignCenter</set>
       </property>
       <property name="placeholderText">
-       <string>رقم الطالب</string>
+       <string>كود الطالب</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_68">
