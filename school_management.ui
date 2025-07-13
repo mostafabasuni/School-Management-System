@@ -122,8 +122,19 @@
         <x>280</x>
         <y>205</y>
         <width>201</width>
-        <height>29</height>
+        <height>30</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>اسم الموظف</string>
       </property>
      </widget>
      <widget class="QGroupBox" name="groupBox_5">
@@ -422,7 +433,7 @@
         <x>490</x>
         <y>205</y>
         <width>75</width>
-        <height>32</height>
+        <height>30</height>
        </rect>
       </property>
       <property name="font">
@@ -700,7 +711,7 @@
         <x>530</x>
         <y>215</y>
         <width>75</width>
-        <height>32</height>
+        <height>30</height>
        </rect>
       </property>
       <property name="font">
@@ -718,8 +729,19 @@
         <x>320</x>
         <y>215</y>
         <width>201</width>
-        <height>29</height>
+        <height>30</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>اسم المدرس</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidget_2">

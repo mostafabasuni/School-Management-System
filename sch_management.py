@@ -118,10 +118,12 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_10.clicked.connect(self.handle_user_creation)
         self.pushButton_11.clicked.connect(self.handle_user_update)
         self.pushButton_12.clicked.connect(self.handle_user_delete)
+        self.pushButton_13.clicked.connect(self.user_search)
         self.pushButton_14.clicked.connect(self.clear_teacher_form)
         self.pushButton_15.clicked.connect(self.handle_teacher_creation)
         self.pushButton_16.clicked.connect(self.handle_teacher_update)
         self.pushButton_17.clicked.connect(self.handle_teacher_delete)
+        self.pushButton_18.clicked.connect(self.teacher_search)
         self.pushButton_19.clicked.connect(self.grade_course_search)
         self.pushButton_20.clicked.connect(self.clear_course_form)
         self.pushButton_21.clicked.connect(self.handle_course_creation)
@@ -325,6 +327,31 @@ class Main(QtWidgets.QMainWindow):
                 self.clear_user_form()
             else:
                 QtWidgets.QMessageBox.warning(self, "خطأ", message)
+                
+    def user_search(self):
+        try:
+            # جلب بيانات البحث
+            user_name = self.lineEdit_8.text().strip()            
+            # التحقق من المدخلات
+            if not (user_name):
+                QtWidgets.QMessageBox.warning(self, "تحذير", " يرجى إدخال اسم الموظف ")
+                return
+            # البحث باستخدام OR للسماح بالبحث بكلا الحقلين معاً
+            query = User.select()
+            if user_name :
+                query = query.where((User.fullname.contains(user_name)))            
+            user = query.first()           
+            if not user:
+                QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد موظف بهذه البيانات")
+                return
+            item = self.tableWidget.findItems(str(user.id), Qt.MatchContains)            
+            self.tableWidget.setCurrentItem(item[0])
+        except DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "الموظف غير موجود")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
+
+    
     def clear_user_form(self):
         self.lineEdit_3.clear()
         self.lineEdit_4.clear()
@@ -365,6 +392,30 @@ class Main(QtWidgets.QMainWindow):
         self.lineEdit_9.setText(teacher.teacher_code)
         self.lineEdit_10.setText(teacher.name)
         self.lineEdit_11.setText(teacher.specialization)
+    
+    def teacher_search(self):
+        try:
+            # جلب بيانات البحث
+            teacher_name = self.lineEdit_12.text().strip()            
+            # التحقق من المدخلات
+            if not (teacher_name):
+                QtWidgets.QMessageBox.warning(self, "تحذير", " يرجى إدخال اسم الموظف ")
+                return
+            # البحث باستخدام OR للسماح بالبحث بكلا الحقلين معاً
+            query = Teacher.select()
+            if teacher_name :
+                query = query.where((Teacher.name.contains(teacher_name)))            
+            teacher = query.first()            
+            if not teacher:
+                QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد مدرس بهذه البيانات")
+                return
+            item = self.tableWidget_2.findItems(str(teacher.id), Qt.MatchContains)            
+            self.tableWidget_2.setCurrentItem(item[0])
+        except DoesNotExist:
+            QtWidgets.QMessageBox.warning(self, "خطأ", "المدرس غير موجود")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
+
         
     def handle_teacher_creation(self):
         t_code = self.lineEdit_9.text().strip()
