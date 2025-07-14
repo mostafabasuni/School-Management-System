@@ -229,6 +229,9 @@ class Main(QtWidgets.QMainWindow):
         
         username = self.lineEdit.text().strip()
         password = self.lineEdit_2.text().strip()
+        if not all([username, password]):        
+            QtWidgets.QMessageBox.warning(self, "بيانات ناقصة", "يرجى ملء جميع الحقول.")
+            return 
 
         success, result = self.user_manager.login(username, password)
 
@@ -1159,8 +1162,7 @@ class Main(QtWidgets.QMainWindow):
             students = Student.select().where(Student.grade_id == grade.id)
             for row, student in enumerate(students):
                 self.tableWidget_5.insertRow(row)
-                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))
-                print("Student ID: ", student.id)
+                self.tableWidget_5.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))                
                 self.tableWidget_5.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
                 # محاولة جلب الدرجات إن وُجدت
                 try:
