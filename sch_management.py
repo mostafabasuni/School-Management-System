@@ -449,6 +449,9 @@ class Main(QtWidgets.QMainWindow):
         success, message = self.teacher_manager.update_teacher(id_, teacher_code, name, specialization)
         if success:
             QtWidgets.QMessageBox.information(self, "نجاح", message)
+            self.comboBox_7.clear()
+            for teacher in Teacher.select():            
+                self.comboBox_7.addItem(teacher.name, teacher.teacher_code)
             self.load_teachers()
         else:
             QtWidgets.QMessageBox.critical(self, "خطأ", message)
