@@ -150,6 +150,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_72.clicked.connect(self.final_results_tab)
         self.pushButton_73.clicked.connect(self.print_settings)
         self.pushButton_74.clicked.connect(self.on_show_midterm_clicked)
+        self.pushButton_75.clicked.connect(self.section_search)
         self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
         self.pushButton.clicked.connect(lambda: self.highlight_active_button(self.pushButton))
@@ -988,6 +989,35 @@ class Main(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ غير متوقع: {str(e)}")
 
+    def section_search(self):
+        section = self.spinBox_3.value()
+        grade_name = self.comboBox_11.currentText()
+        level = self.comboBox_12.currentText()
+        
+        if not (grade_name and level):
+            QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى اختيار الصف والمرحلة")
+            return
+        grade = Grade.get_or_none(Grade.name == grade_name, Grade.level == level, Grade.section == section)
+        
+        students = Student.select().where(
+            (Student.grade_id == grade.id) if grade else (Student.grade_id.is_null(True)))
+        
+        if not students.exists():
+            QtWidgets.QMessageBox.information(self, "تنبيه", "لا يوجد طلاب في هذا الصف")
+            return
+        
+        self.tableWidget_4.setRowCount(0)
+        for row, student in enumerate(students):
+            self.tableWidget_4.insertRow(row)
+            self.tableWidget_4.setItem(row, 0, QtWidgets.QTableWidgetItem(str(student.id)))
+            self.tableWidget_4.setItem(row, 1, QtWidgets.QTableWidgetItem(student.student_code))
+            self.tableWidget_4.setItem(row, 2, QtWidgets.QTableWidgetItem(student.name))
+            self.tableWidget_4.setItem(row, 3, QtWidgets.QTableWidgetItem(str(student.age)))
+            self.tableWidget_4.setItem(row, 4, QtWidgets.QTableWidgetItem(student.grade.name))
+            self.tableWidget_4.setItem(row, 5, QtWidgets.QTableWidgetItem(str(student.grade.section)))
+            self.tableWidget_4.setItem(row, 6, QtWidgets.QTableWidgetItem(student.grade.level))
+            self.tableWidget_4.setItem(row, 7, QtWidgets.QTableWidgetItem(student.registration_date.strftime("%Y-%m-%d")))
+    
             
     def setup_student_tab(self):
                 # تحميل الصفوف في Combobox
