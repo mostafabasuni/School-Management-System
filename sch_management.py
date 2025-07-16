@@ -151,6 +151,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_73.clicked.connect(self.print_settings)
         self.pushButton_74.clicked.connect(self.on_show_midterm_clicked)
         self.pushButton_75.clicked.connect(self.section_search)
+        self.pushButton_76.clicked.connect(self.print_settings)
         self.comboBox_3.currentIndexChanged.connect(self.show_permissions)
         
         self.pushButton.clicked.connect(lambda: self.highlight_active_button(self.pushButton))
@@ -1426,9 +1427,11 @@ class Main(QtWidgets.QMainWindow):
                     table { width: 100%; border-collapse: collapse; direction: rtl; }
                 """)
                 if self.tabWidget.currentIndex() == 7:
-                    document.setHtml(self.generate_student_grades_print())
+                    document.setHtml(self.student_grades_print())
+                elif self.tabWidget.currentIndex() == 5:
+                    document.setHtml(self.class_names_print())
                 else:
-                    document.setHtml(self.generate_class_grades_print())
+                    document.setHtml(self.class_grades_print())
                 document.print_(printer)
                 
                 QtWidgets.QMessageBox.information(self, "نجاح", "تم إرسال التقرير إلى الطابعة")
@@ -1436,8 +1439,138 @@ class Main(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء الطباعة: {str(e)}")
             
-    def generate_student_grades_print(self):
-        
+    def class_names_print(self):
+        font_settings = {
+        'header_font': 'Arial',  # خط العناوين الرئيسية
+        'header_size': '20pt',
+        'body_font': 'Times New Roman',  # خط النص العادي
+        'body_size': '16pt',
+        'table_header_font': 'Arial',
+        'table_header_size': '14pt',
+        'table_body_font': 'Arial',
+        'table_body_size': '14pt',
+        'signature_font': 'Arial',
+        'signature_size': '10pt'
+        }
+
+        level = self.comboBox_12.currentText()
+        name = self.comboBox_11.currentText()
+        section = self.spinBox_3.value()
+
+        html = f"""
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="UTF-8">        
+            <style>
+                body {{
+                    font-family: {font_settings['body_font']}, sans-serif;
+                    font-size: {font_settings['body_size']};
+                    margin: 0;
+                    padding: 20px;
+                    direction: rtl;
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 30px;
+                }}
+                .header h1 {{
+                    font-family: '{font_settings['header_font']}';
+                    font-size: {font_settings['header_size']};
+                    color: #0066cc;
+                }}
+                .student-info {{
+                    margin-bottom: 20px;
+                    border: 1px solid #ddd;
+                    padding: 15px;
+                    background-color: #f9f9f9;
+                    border-radius: 5px;
+                    font-family: '{font_settings['body_font']}';
+                    font-size: {font_settings['body_size']};
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    direction: rtl;
+                    text-align: center;
+                }}
+                th {{
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px;
+                    direction: rtl;
+                    text-align: center;
+                    font-family: '{font_settings['table_header_font']}';
+                    font-size: {font_settings['table_header_size']};
+                }}
+                td {{
+                    padding: 10px;
+                    border-bottom: 1px solid #ddd;
+                    text-align: left;
+                    font-family: '{font_settings['table_body_font']}';
+                    font-size: {font_settings['table_body_size']};
+                    direction: rtl;                    
+                }}
+                .total {{
+                    font-weight: bold;
+                    color: #0066cc;
+                }}
+                .footer {{
+                    margin-top: 30px;
+                    text-align: center;
+                    float: left;
+                    font-family: '{font_settings['signature_font']}';
+                    font-size: {font_settings['signature_size']};
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>كشف أسماء الطلاب</h1>
+            </div>
+
+            <div class="student-info">
+                <p>
+                    <strong>المرحلة:</strong> {level} - 
+                    <strong>الصف:</strong> {name} - 
+                    <strong>الفصل:</strong> {section}
+                </p>
+            </div>
+
+            <table>
+                <tr>
+                    <th>تاريخ التسجيل</th>
+                    <th>العمر</th>
+                    <th>اسم الطالب</th>
+                    <th>كود الطالب</th>
+                </tr>
+        """
+
+        for row in range(self.tableWidget_4.rowCount()):
+            html += f"""
+            <tr>
+                <td class="total">{self.tableWidget_4.item(row, 7).text()}</td>
+                <td>{self.tableWidget_4.item(row, 3).text()}</td>
+                <td>{self.tableWidget_4.item(row, 2).text()}</td>
+                <td>{self.tableWidget_4.item(row, 1).text()}</td>
+            </tr>
+            """
+
+        html += f"""
+            </table>
+
+            <div class="footer">
+                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return html
+
+    
+    def student_grades_print(self):        
         font_settings = {
         'header_font': 'Arial',  # خط العناوين الرئيسية
         'header_size': '20pt',
@@ -1934,7 +2067,7 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
             
     
-    def generate_class_grades_print(self):
+    def class_grades_print(self):
         font_settings = {
         'header_font': 'Arial',  # خط العناوين الرئيسية
         'header_size': '20pt',
