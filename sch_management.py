@@ -1479,7 +1479,7 @@ class Main(QtWidgets.QMainWindow):
                     font-size: {font_settings['header_size']};
                     color: #0066cc;
                 }}
-                .student-info {{
+                .section-info {{
                     margin-bottom: 20px;
                     border: 1px solid #ddd;
                     padding: 15px;
@@ -1530,11 +1530,11 @@ class Main(QtWidgets.QMainWindow):
                 <h1>كشف أسماء الطلاب</h1>
             </div>
 
-            <div class="student-info">
+            <div class="section-info">
                 <p>
-                    <strong>المرحلة:</strong> {level} - 
-                    <strong>الصف:</strong> {name} - 
-                    <strong>الفصل:</strong> {section}
+                    <strong>: المرحلة</strong> {level}  
+                    <strong>: الصف</strong> {name}  
+                    <strong>: الفصل</strong> {section}
                 </p>
             </div>
 
