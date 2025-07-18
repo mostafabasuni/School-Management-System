@@ -1482,11 +1482,15 @@ class Main(QtWidgets.QMainWindow):
                 .section-info {{
                     margin-bottom: 20px;
                     border: 1px solid #ddd;
-                    padding: 15px;
-                    background-color: #f9f9f9;
-                    border-radius: 5px;
+                    padding: 15px;                    
                     font-family: '{font_settings['body_font']}';
                     font-size: {font_settings['body_size']};
+                }}
+                strong {{                
+                    float: right;
+                    display: block;
+                    color: black;
+                    margin-left: 100px;
                 }}
                 table {{
                     width: 100%;
@@ -1532,8 +1536,8 @@ class Main(QtWidgets.QMainWindow):
 
             <div class="section-info">
                 <p>
-                    <strong>: المرحلة</strong> {level}  
-                    <strong>: الصف</strong> {name}  
+                    <strong>: المرحلة</strong> {level}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    <strong>: الصف</strong> {name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
                     <strong>: الفصل</strong> {section}
                 </p>
             </div>
