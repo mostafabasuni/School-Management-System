@@ -95,7 +95,7 @@ class Main(QtWidgets.QMainWindow):
             lambda: self.display_top_ten(current_grade_id))
         self.pushButton_school_top.clicked.connect(
             lambda: self.display_top_ten())'''
-        self.pushButton_69.clicked.connect(self.upgrade_grade_scores)
+        
         
         #self.pushButton_display_results.clicked.connect(self.display_final_results)     
         
@@ -145,6 +145,7 @@ class Main(QtWidgets.QMainWindow):
         self.pushButton_53.clicked.connect(self.handle_grade_delete)
         self.pushButton_67.clicked.connect(self.open_grades_tab)
         self.pushButton_68.clicked.connect(self.print_settings)
+        self.pushButton_69.clicked.connect(self.upgrade_grade_scores)
         self.pushButton_70.clicked.connect(self.on_show_final_clicked)
         self.pushButton_71.clicked.connect(self.on_show_top_ten_clicked)
         self.pushButton_72.clicked.connect(self.final_results_tab)
@@ -1323,14 +1324,14 @@ class Main(QtWidgets.QMainWindow):
             
             # إعداد الجدول
             self.tableWidget_13.setRowCount(0)
-            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
+            '''self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
             headers = [
                 "الترتيب", "كود الطالب", "اسم الطالب", 
                 "درجة نصف العام", "درجة نهاية العام", 
                 "المعدل العام", "التقدير"
             ]
             self.tableWidget_13.setHorizontalHeaderLabels(headers)
-            
+            '''
             # تعبئة البيانات
             for row, student in enumerate(students):
                 self.tableWidget_13.insertRow(row)
@@ -1585,7 +1586,7 @@ class Main(QtWidgets.QMainWindow):
         'table_body_font': 'Arial',
         'table_body_size': '11pt',
         'signature_font': 'Arial',
-        'signature_size': '16pt'
+        'signature_size': '10pt'
     }
         student_code = self.lineEdit_24.text()
         student_name = self.comboBox_2.currentText()
@@ -1625,6 +1626,8 @@ class Main(QtWidgets.QMainWindow):
                     width: 100%;
                     border-collapse: collapse;
                     margin-top: 20px;
+                    direction: rtl;
+                    text-align: center;
                 }}
                 th {{
                     background-color: #4CAF50;
@@ -1637,7 +1640,7 @@ class Main(QtWidgets.QMainWindow):
                 td {{
                     padding: 10px;
                     border-bottom: 1px solid #ddd;
-                    text-align: right;
+                    text-align: left;
                     font-family: '{font_settings['table_body_font']}';
                     font-size: {font_settings['table_body_size']};
                 }}
@@ -1657,14 +1660,13 @@ class Main(QtWidgets.QMainWindow):
         <body>
             <div class="header">
                 <h1 style="color: #0066cc;">كشف درجات الطالب</h1>
-                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
             </div>
             
             <div class="student-info">
-                <p><strong>:  اسم الطالب </strong>  {student_name}</p>
-                <p><strong>:  رقم الطالب </strong>  {student_code}</p>
-                <p><strong>:  الصف </strong>  {self.lineEdit_28.text()}</p>
-                <p><strong>:  المرحلة </strong>  {self.lineEdit_43.text()}</p>
+                <p><strong>:  اسم الطالب </strong> {student_name}</p>
+                <p><strong>:  رقم الطالب </strong> {student_code}</p>
+                <p><strong>:  الصف </strong> {self.lineEdit_28.text()}</p>
+                <p><strong>:  المرحلة </strong> {self.lineEdit_43.text()}</p>
             </div>
             
             <table>
@@ -1688,12 +1690,11 @@ class Main(QtWidgets.QMainWindow):
             </tr>
             """
         
-        html += """
+        html += f"""
             </table>
             
             <div class="footer">
-                <p>: توقيع المسئول </p>
-                <p>: التاريخ </p>
+                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
             </div>
         </body>
         </html>
@@ -1705,41 +1706,41 @@ class Main(QtWidgets.QMainWindow):
 # =================== النتائج النهائية =========================
 
     def display_top_ten(self, grade_id=None):
-        """عرض العشرة الأوائل (لصف معين أو للمدرسة ككل)"""
+        """عرض العشرة الأوائل لجميع فصول صف معين"""
         try:
             term = self.comboBox_19.currentText()
             level = self.comboBox_21.currentText()
             grade_name = self.comboBox_18.currentText()
             academic_year = self.comboBox_20.currentText()
-            
-            grade_id = Grade.get(
-            (Grade.name == grade_name) & 
-            (Grade.level == level) & 
-            (Grade.term == term) &
-            (Grade.academic_year == academic_year)).id            
-            if grade_id:
-                rankings = ScoreService.calculate_class_rankings(grade_id, academic_year)
-                title = "أوائل الصف"            
+
+            grades = Grade.select().where(
+                (Grade.name == grade_name) & 
+                (Grade.level == level) & 
+                (Grade.term == term) &
+                (Grade.academic_year == academic_year)
+            )
+
+            if not grades.exists():
+                QtWidgets.QMessageBox.warning(self, "تنبيه", "لا يوجد صفوف مطابقة للبحث")
+                return
+
+            rankings = ScoreService.calculate_class_rankings(grades, academic_year)
+
             self.tableWidget_13.setRowCount(0)
-            
-            for row, record in enumerate(rankings[:10]):  # عرض أول 10 فقط
-                student = record['student'] if grade_id else record
-                
+
+            for row, record in enumerate(rankings[:10]):  # أول 10 طلاب
+                student = record['student']
                 self.tableWidget_13.insertRow(row)
-                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(str(row+1)))
-                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.student_code))
-                self.tableWidget_13.setItem(row, 2, QtWidgets.QTableWidgetItem(student.name))
-                
-                avg = record['overall_average'] if grade_id else student.overall_average
-                self.tableWidget_13.setItem(row, 3, QtWidgets.QTableWidgetItem(f"{avg:.2f}"))
-                
-                # تلوين الصفوف الثلاثة الأولى
-                #if row < 3:
-                #    for col in range(self.tableWidget_13.columnCount()):
-                #        self.tableWidget_13.item(row, col).setStyleSheet(
-                #                "background-color: rgb(255, 200, 200);"
-                #            )
-        
+                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+                self.tableWidget_13.setItem(row, 4, QtWidgets.QTableWidgetItem(f"{record['overall_average']:.2f}"))
+
+                # تلوين الثلاثة الأوائل
+                if row < 3:
+                    for col in range(self.tableWidget_13.columnCount()):
+                        item = self.tableWidget_13.item(row, col)
+                        if item:  # ✅ تأكد من وجود العنصر
+                            item.setBackground(QtGui.QColor(255, 223, 186))
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
 
@@ -1795,6 +1796,7 @@ class Main(QtWidgets.QMainWindow):
             
             # إعداد الجدول
             self.tableWidget_13.setRowCount(0)
+            '''
             self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
             headers = [
                 "الترتيب", "كود الطالب", "اسم الطالب", 
@@ -1802,7 +1804,7 @@ class Main(QtWidgets.QMainWindow):
                 "المعدل العام", "التقدير"
             ]
             self.tableWidget_13.setHorizontalHeaderLabels(headers)
-            
+            '''
             # تعبئة البيانات
             for row, student in enumerate(students):
                 self.tableWidget_13.insertRow(row)
@@ -2016,9 +2018,7 @@ class Main(QtWidgets.QMainWindow):
                 (Grade.term == term) & 
                 (Grade.academic_year == academic_year)
             )
-
-            students = Student.select().where(Student.grade == grade)
-
+            students = Student.select().where(Student.grade_id == grade)            
             if not students.exists():
                 QtWidgets.QMessageBox.warning(self, "تحذير", "لا يوجد طلاب في هذا الصف")
                 return
@@ -2082,7 +2082,7 @@ class Main(QtWidgets.QMainWindow):
         'table_body_font': 'Arial',
         'table_body_size': '12pt',
         'signature_font': 'Arial',
-        'signature_size': '16pt'
+        'signature_size': '10pt'
     }
         
         html = f"""
@@ -2120,19 +2120,21 @@ class Main(QtWidgets.QMainWindow):
                     width: 100%;
                     border-collapse: collapse;
                     margin-top: 20px;
+                    direction: rtl;
+                    text-align: center;
                 }}
                 th {{
                     background-color: #4CAF50;
                     color: white;
                     padding: 12px;
-                    text-align: right;
+                    text-align: left;
                     font-family: '{font_settings['table_header_font']}';
                     font-size: {font_settings['table_header_size']};
                 }}
                 td {{
                     padding: 10px;
                     border-bottom: 1px solid #ddd;
-                    text-align: right;
+                    text-align: left;
                     font-family: '{font_settings['table_body_font']}';
                     font-size: {font_settings['table_body_size']};
                 }}
@@ -2152,7 +2154,6 @@ class Main(QtWidgets.QMainWindow):
         <body>
             <div class="header">
                 <h1 style="color: #0066cc;">كشف درجات الصف</h1>
-                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>
             </div>
             
             <div class="student-info">
@@ -2169,7 +2170,6 @@ class Main(QtWidgets.QMainWindow):
                     <th>درجة نهاية العام</th>
                     <th>درجة نصف العام</th>
                     <th>اسم الطالب</th>
-                    <th>كود الطالب</th>
                     <th>الترتيب</th
                 </tr>
         """
@@ -2182,15 +2182,15 @@ class Main(QtWidgets.QMainWindow):
                 <td>{self.tableWidget_13.item(row, 4).text()}</td>
                 <td>{self.tableWidget_13.item(row, 3).text()}</td>
                 <td>{self.tableWidget_13.item(row, 2).text()}</td>
-                <td>{self.tableWidget_13.item(row, 1).text()}</td>
                 <td>{self.tableWidget_13.item(row, 0).text()}</td>
             </tr>
             """
         
-        html += """
+        html += f"""
             </table>
             
             <div class="footer">
+                <p>:  تاريخ الطباعة   {QDate.currentDate().toString("yyyy/MM/dd")}</p>            
             </div>
         </body>
         </html>

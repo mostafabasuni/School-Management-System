@@ -36,13 +36,12 @@ class ScoreService:
         Returns:
             list: قائمة مصنفة تحتوي على:
                 [{'student': student_obj, 'overall_average': x, 'rank': y}, ...]
-        """
-        print(f"Calculating totals for grade {grade_id} in academic year {academic_year}")
+        """        
         # جلب الطلاب في الصف المحدد مع درجاتهم
         students = (Student
                 .select()
                 .where(
-                (Student.grade == grade_id) &
+                (Student.grade_id == grade_id) &
                 (Student.overall_average > 0)
                 )
                 .order_by(Student.overall_average.desc()))
@@ -99,21 +98,25 @@ class ScoreService:
 
     
     @staticmethod
-    def calculate_class_rankings(grade_id, academic_year):
+    def calculate_class_rankings(grades, academic_year):
         """
         حساب التصنيفات داخل الصف
+        Args:
+            grades: QuerySet من كائنات Grade
+            academic_year: السنة الدراسية
         Returns:
-            list: قائمة مصنفة تحتوي على:
-                [{'student': student_obj, 'overall_average': x, 'rank': y}, ...]
+            قائمة مصنفة بأوائل الطلاب
         """
+        grade_ids = [g.id for g in grades]  # استخراج المعرفات فقط
+
         students = (Student
-                .select()
-                .where(
-                    (Student.grade == grade_id) &
-                    (Student.overall_average > 0)
-                )
-                .order_by(Student.overall_average.desc()))
-        
+                    .select()
+                    .where(
+                        (Student.grade.in_(grade_ids)) &
+                        (Student.overall_average > 0)
+                    )
+                    .order_by(Student.overall_average.desc()))
+
         rankings = []
         for rank, student in enumerate(students, start=1):
             rankings.append({
@@ -121,9 +124,9 @@ class ScoreService:
                 'overall_average': student.overall_average,
                 'rank': rank
             })
-        
+
         return rankings
-    
+
     @staticmethod
     def calculate_school_rankings(academic_year):
         """
