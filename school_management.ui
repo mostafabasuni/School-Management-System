@@ -4827,7 +4827,7 @@
       </property>
       <column>
        <property name="text">
-        <string>رقم الطالب</string>
+        <string>كود الطالب</string>
        </property>
        <property name="font">
         <font>

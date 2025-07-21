@@ -1317,7 +1317,7 @@ class Main(QtWidgets.QMainWindow):
                     .select(Student, Grade)
                     .join(Grade)
                     .where(
-                        (Student.grade == grade_id) &
+                        (Student.grade_id == grade_id) &
                         (Student.midterm_total > 0)
                     )
                     .order_by(Student.midterm_total.desc()))
@@ -1334,9 +1334,16 @@ class Main(QtWidgets.QMainWindow):
             '''
             # تعبئة البيانات
             for row, student in enumerate(students):
-                self.tableWidget_13.insertRow(row)
+                self.tableWidget_13.insertRow(row)     
+                            
+                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+                self.tableWidget_13.setItem(row, 2, QtWidgets.QTableWidgetItem(str(student.midterm_total)))
+                self.tableWidget_13.setItem(row, 3, QtWidgets.QTableWidgetItem("-"))
+                self.tableWidget_13.setItem(row, 4, QtWidgets.QTableWidgetItem("-"))
                 
-                items = [
+                
+                '''items = [
                     QtWidgets.QTableWidgetItem(str(row + 1)),
                     QtWidgets.QTableWidgetItem(student.student_code),
                     QtWidgets.QTableWidgetItem(student.name),
@@ -1359,7 +1366,7 @@ class Main(QtWidgets.QMainWindow):
                     # ضبط إعدادات الجدول
             self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
             self.tableWidget_13.setSortingEnabled(True)
-            
+            '''
             # إضافة إحصاءات أسفل الجدول
             self.textEdit.setText(
                 f"إحصاءات الصف: {grade_name}\n"
@@ -1372,6 +1379,132 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
 
     
+    def display_final_results(self):
+        """عرض نتائج جميع طلاب الصف مع التصنيف"""
+        try:
+            academic_year = self.comboBox_20.currentText()
+            term = self.comboBox_19.currentText()
+            level = self.comboBox_21.currentText()
+            grade_name = self.comboBox_18.currentText()
+            if not (academic_year and term and level and grade_name):
+                QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى اختيار جميع الحقول المطلوبة")
+                return
+            grade_id = Grade.get(
+                (Grade.name == grade_name) & 
+                (Grade.level == level) & 
+                (Grade.term == term) &
+                (Grade.academic_year == academic_year)
+            ).id                    
+            # جلب الطلاب مصنفين مع معلومات الصف
+            students = (Student
+                    .select(Student, Grade)
+                    .join(Grade)
+                    .where(
+                        (Student.grade == grade_id) &
+                        (Student.overall_average > 0)
+                    )
+                    .order_by(Student.overall_average.desc()))
+            
+            # إعداد الجدول
+            self.tableWidget_13.setRowCount(0)
+            '''
+            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
+            headers = [
+                "الترتيب", "كود الطالب", "اسم الطالب", 
+                "درجة نصف العام", "درجة نهاية العام", 
+                "المعدل العام", "التقدير"
+            ]
+            self.tableWidget_13.setHorizontalHeaderLabels(headers)
+            '''
+            # تعبئة البيانات
+            for row, student in enumerate(students):
+                self.tableWidget_13.insertRow(row)
+                
+                items = [
+                    QtWidgets.QTableWidgetItem(str(row + 1)),
+                    QtWidgets.QTableWidgetItem(student.student_code),
+                    QtWidgets.QTableWidgetItem(student.name),
+                    QtWidgets.QTableWidgetItem(f"{student.midterm_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.final_total:.2f}"),
+                    QtWidgets.QTableWidgetItem(f"{student.overall_average:.2f}"),
+                    QtWidgets.QTableWidgetItem(self.get_grade_letter(student.overall_average))
+                ]
+                
+                # تعبئة الخلايا
+                for col, item in enumerate(items):
+                    self.tableWidget_13.setItem(row, col, item)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    
+                    # تنسيق الصفوف الأولى
+                    if row < 3:
+                        item.setBackground(QtGui.QColor(255, 235, 156))  # تأكد من استيراد QtGui
+                    elif student.overall_average < 50:
+                        item.setBackground(QtGui.QColor(255, 200, 200))
+                    # ضبط إعدادات الجدول
+            self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.tableWidget_13.setSortingEnabled(True)
+            
+            # إضافة إحصاءات أسفل الجدول
+            self.textEdit.setText(
+                f"إحصاءات الصف: {grade_name}\n"
+                f"عدد الطلاب: {students.count()} \n "
+                f"أعلى معدل: {students[0].overall_average:.2f} \n "
+                f"أقل معدل: {students[-1].overall_average:.2f} \n "
+                f"المعدل العام: {self.calculate_class_average(students):.2f}"
+            )
+            
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+    def display_top_ten(self, grade_id=None):
+        """عرض العشرة الأوائل لجميع فصول صف معين"""
+        try:
+            term = self.comboBox_19.currentText()
+            level = self.comboBox_21.currentText()
+            grade_name = self.comboBox_18.currentText()
+            academic_year = self.comboBox_20.currentText()
+
+            grades = Grade.select().where(
+                (Grade.name == grade_name) & 
+                (Grade.level == level) & 
+                (Grade.term == term) &
+                (Grade.academic_year == academic_year)
+            )
+
+            if not grades.exists():
+                QtWidgets.QMessageBox.warning(self, "تنبيه", "لا يوجد صفوف مطابقة للبحث")
+                return
+
+            rankings = ScoreService.calculate_class_rankings(grades, academic_year)
+
+            self.tableWidget_13.setRowCount(0)
+
+            for row, record in enumerate(rankings[:10]):  # أول 10 طلاب
+                student = record['student']
+                self.tableWidget_13.insertRow(row)
+                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+                self.tableWidget_13.setItem(row, 4, QtWidgets.QTableWidgetItem(f"{record['overall_average']:.2f}"))
+
+                # تلوين الثلاثة الأوائل
+                if row < 3:
+                    for col in range(self.tableWidget_13.columnCount()):
+                        item = self.tableWidget_13.item(row, col)
+                        if item:  # ✅ تأكد من وجود العنصر
+                            item.setBackground(QtGui.QColor(255, 223, 186))
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
+
+
+    def get_grade_letter(self, score):
+        """تحويل المعدل إلى تقدير"""
+        if score >= 270: return "ممتاز"
+        elif score >= 240: return "جيد جداً"
+        elif score >= 210: return "جيد"
+        elif score >= 180: return "مقبول"
+        else: return "راسب"
+
+
     
     def display_student_scores(self, student):
         """عرض درجات الطالب في الجدول"""
@@ -1705,45 +1838,6 @@ class Main(QtWidgets.QMainWindow):
 
 # =================== النتائج النهائية =========================
 
-    def display_top_ten(self, grade_id=None):
-        """عرض العشرة الأوائل لجميع فصول صف معين"""
-        try:
-            term = self.comboBox_19.currentText()
-            level = self.comboBox_21.currentText()
-            grade_name = self.comboBox_18.currentText()
-            academic_year = self.comboBox_20.currentText()
-
-            grades = Grade.select().where(
-                (Grade.name == grade_name) & 
-                (Grade.level == level) & 
-                (Grade.term == term) &
-                (Grade.academic_year == academic_year)
-            )
-
-            if not grades.exists():
-                QtWidgets.QMessageBox.warning(self, "تنبيه", "لا يوجد صفوف مطابقة للبحث")
-                return
-
-            rankings = ScoreService.calculate_class_rankings(grades, academic_year)
-
-            self.tableWidget_13.setRowCount(0)
-
-            for row, record in enumerate(rankings[:10]):  # أول 10 طلاب
-                student = record['student']
-                self.tableWidget_13.insertRow(row)
-                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
-                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
-                self.tableWidget_13.setItem(row, 4, QtWidgets.QTableWidgetItem(f"{record['overall_average']:.2f}"))
-
-                # تلوين الثلاثة الأوائل
-                if row < 3:
-                    for col in range(self.tableWidget_13.columnCount()):
-                        item = self.tableWidget_13.item(row, col)
-                        if item:  # ✅ تأكد من وجود العنصر
-                            item.setBackground(QtGui.QColor(255, 223, 186))
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
-
     def on_update_class_grades(self):
         academic_year = self.comboBox_20.currentText()
         term = self.comboBox_19.currentText()
@@ -1768,91 +1862,6 @@ class Main(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "خطأ", message)
             
             
-    def display_final_results(self):
-        """عرض نتائج جميع طلاب الصف مع التصنيف"""
-        try:
-            academic_year = self.comboBox_20.currentText()
-            term = self.comboBox_19.currentText()
-            level = self.comboBox_21.currentText()
-            grade_name = self.comboBox_18.currentText()
-            if not (academic_year and term and level and grade_name):
-                QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى اختيار جميع الحقول المطلوبة")
-                return
-            grade_id = Grade.get(
-                (Grade.name == grade_name) & 
-                (Grade.level == level) & 
-                (Grade.term == term) &
-                (Grade.academic_year == academic_year)
-            ).id                    
-            # جلب الطلاب مصنفين مع معلومات الصف
-            students = (Student
-                    .select(Student, Grade)
-                    .join(Grade)
-                    .where(
-                        (Student.grade == grade_id) &
-                        (Student.overall_average > 0)
-                    )
-                    .order_by(Student.overall_average.desc()))
-            
-            # إعداد الجدول
-            self.tableWidget_13.setRowCount(0)
-            '''
-            self.tableWidget_13.setColumnCount(7)  # عدد الأعمدة
-            headers = [
-                "الترتيب", "كود الطالب", "اسم الطالب", 
-                "درجة نصف العام", "درجة نهاية العام", 
-                "المعدل العام", "التقدير"
-            ]
-            self.tableWidget_13.setHorizontalHeaderLabels(headers)
-            '''
-            # تعبئة البيانات
-            for row, student in enumerate(students):
-                self.tableWidget_13.insertRow(row)
-                
-                items = [
-                    QtWidgets.QTableWidgetItem(str(row + 1)),
-                    QtWidgets.QTableWidgetItem(student.student_code),
-                    QtWidgets.QTableWidgetItem(student.name),
-                    QtWidgets.QTableWidgetItem(f"{student.midterm_total:.2f}"),
-                    QtWidgets.QTableWidgetItem(f"{student.final_total:.2f}"),
-                    QtWidgets.QTableWidgetItem(f"{student.overall_average:.2f}"),
-                    QtWidgets.QTableWidgetItem(self.get_grade_letter(student.overall_average))
-                ]
-                
-                # تعبئة الخلايا
-                for col, item in enumerate(items):
-                    self.tableWidget_13.setItem(row, col, item)
-                    item.setTextAlignment(Qt.AlignCenter)
-                    
-                    # تنسيق الصفوف الأولى
-                    if row < 3:
-                        item.setBackground(QtGui.QColor(255, 235, 156))  # تأكد من استيراد QtGui
-                    elif student.overall_average < 50:
-                        item.setBackground(QtGui.QColor(255, 200, 200))
-                    # ضبط إعدادات الجدول
-            self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-            self.tableWidget_13.setSortingEnabled(True)
-            
-            # إضافة إحصاءات أسفل الجدول
-            self.textEdit.setText(
-                f"إحصاءات الصف: {grade_name}\n"
-                f"عدد الطلاب: {students.count()} \n "
-                f"أعلى معدل: {students[0].overall_average:.2f} \n "
-                f"أقل معدل: {students[-1].overall_average:.2f} \n "
-                f"المعدل العام: {self.calculate_class_average(students):.2f}"
-            )
-            
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
-
-    def get_grade_letter(self, score):
-        """تحويل المعدل إلى تقدير"""
-        if score >= 270: return "ممتاز"
-        elif score >= 240: return "جيد جداً"
-        elif score >= 210: return "جيد"
-        elif score >= 180: return "مقبول"
-        else: return "راسب"
-
 
     def calculate_class_average(self, students):
         """حساب المعدل العام للصف"""
@@ -2012,13 +2021,13 @@ class Main(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.warning(self, "تحذير", "يرجى اختيار جميع الحقول المطلوبة")
                 return
 
-            grade = Grade.get(
+            grade_id = Grade.get(
                 (Grade.name == grade_name) & 
                 (Grade.level == level) & 
                 (Grade.term == term) & 
                 (Grade.academic_year == academic_year)
-            )
-            students = Student.select().where(Student.grade_id == grade)            
+            ).id
+            students = Student.select().where(Student.grade_id == grade_id)            
             if not students.exists():
                 QtWidgets.QMessageBox.warning(self, "تحذير", "لا يوجد طلاب في هذا الصف")
                 return
@@ -2046,8 +2055,7 @@ class Main(QtWidgets.QMainWindow):
             
             # إضافة صف إلى جدول العرض
                 row = self.tableWidget_13.rowCount()
-                self.tableWidget_13.insertRow(row)
-                
+                self.tableWidget_13.insertRow(row)                
                 self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
                 self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
                 self.tableWidget_13.setItem(row, 2, QtWidgets.QTableWidgetItem(str(midterm_total)))
