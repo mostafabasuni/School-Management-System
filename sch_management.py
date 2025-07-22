@@ -1419,8 +1419,38 @@ class Main(QtWidgets.QMainWindow):
             # تعبئة البيانات
             for row, student in enumerate(students):
                 self.tableWidget_13.insertRow(row)
+                self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
+                self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
+                self.tableWidget_13.setItem(row, 2, QtWidgets.QTableWidgetItem(str(student.midterm_total)))
+                self.tableWidget_13.setItem(row, 3, QtWidgets.QTableWidgetItem(str(student.final_total)))
                 
-                items = [
+                
+                # خانة المجموع النهائي
+                overall_item = QtWidgets.QTableWidgetItem(str(student.overall_average))
+                
+                # تحويل القيمة إلى float لمقارنتها
+                try:
+                    avg = float(student.overall_average)
+                except ValueError:
+                    avg = 0  # احتياطاً لو كانت القيمة غير رقمية
+
+                # تحديد اللون بناءً على النسبة
+                if avg < 150:
+                    color = QtGui.QColor(255, 102, 102)     # أحمر فاتح
+                elif 150 <= avg < 180:
+                    color = QtGui.QColor(255, 204, 102)     # برتقالي/أصفر
+                elif 180 <= avg < 225:
+                    color = QtGui.QColor(255, 255, 153)     # أصفر باهت
+                elif 225 <= avg < 270:
+                    color = QtGui.QColor(153, 255, 153)     # أخضر فاتح
+                else:
+                    color = QtGui.QColor(102, 204, 255)     # أزرق فاتح
+
+                # تطبيق اللون على الخلية
+                overall_item.setBackground(color)
+                self.tableWidget_13.setItem(row, 4, overall_item)
+                
+                '''items = [
                     QtWidgets.QTableWidgetItem(str(row + 1)),
                     QtWidgets.QTableWidgetItem(student.student_code),
                     QtWidgets.QTableWidgetItem(student.name),
@@ -1443,7 +1473,7 @@ class Main(QtWidgets.QMainWindow):
                     # ضبط إعدادات الجدول
             self.tableWidget_13.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
             self.tableWidget_13.setSortingEnabled(True)
-            
+            '''
             # إضافة إحصاءات أسفل الجدول
             self.textEdit.setText(
                 f"إحصاءات الصف: {grade_name}\n"
@@ -1484,14 +1514,39 @@ class Main(QtWidgets.QMainWindow):
                 self.tableWidget_13.insertRow(row)
                 self.tableWidget_13.setItem(row, 0, QtWidgets.QTableWidgetItem(student.student_code))
                 self.tableWidget_13.setItem(row, 1, QtWidgets.QTableWidgetItem(student.name))
-                self.tableWidget_13.setItem(row, 4, QtWidgets.QTableWidgetItem(f"{record['overall_average']:.2f}"))
+                self.tableWidget_13.setItem(row, 2, QtWidgets.QTableWidgetItem(str(student.midterm_total)))
+                self.tableWidget_13.setItem(row, 3, QtWidgets.QTableWidgetItem(str(student.final_total)))
+                # خانة المجموع النهائي
+                overall_item = QtWidgets.QTableWidgetItem(str(student.overall_average))
+                
+                # تحويل القيمة إلى float لمقارنتها
+                try:
+                    avg = float(student.overall_average)
+                except ValueError:
+                    avg = 0  # احتياطاً لو كانت القيمة غير رقمية
+
+                # تحديد اللون بناءً على النسبة
+                if avg < 150:
+                    color = QtGui.QColor(255, 102, 102)     # أحمر فاتح
+                elif 150 <= avg < 180:
+                    color = QtGui.QColor(255, 204, 102)     # برتقالي/أصفر
+                elif 180 <= avg < 225:
+                    color = QtGui.QColor(255, 255, 153)     # أصفر باهت
+                elif 225 <= avg < 270:
+                    color = QtGui.QColor(153, 255, 153)     # أخضر فاتح
+                else:
+                    color = QtGui.QColor(102, 204, 255)     # أزرق فاتح
+
+                # تطبيق اللون على الخلية
+                overall_item.setBackground(color)
+                self.tableWidget_13.setItem(row, 4, overall_item)
 
                 # تلوين الثلاثة الأوائل
-                if row < 3:
+                ''' if row < 3:
                     for col in range(self.tableWidget_13.columnCount()):
                         item = self.tableWidget_13.item(row, col)
                         if item:  # ✅ تأكد من وجود العنصر
-                            item.setBackground(QtGui.QColor(255, 223, 186))
+                            item.setBackground(QtGui.QColor(255, 223, 186))'''
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ: {str(e)}")
 
