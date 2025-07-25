@@ -1,5 +1,5 @@
 
-from sch_management_db import User, Teacher, Permissions # استيراد الجداول من Peewee
+from sch_management_db import User, Permissions # استيراد الجداول من Peewee
 from peewee import DoesNotExist
 import bcrypt
 

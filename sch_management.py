@@ -28,6 +28,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class Main(QtWidgets.QMainWindow):
     def __init__(self):
+        """
+        The function initializes a class instance by loading a UI file named 'school_management.ui'.
+        """
         super(Main, self).__init__()
         uic.loadUi('school_management.ui', self)  # تحميل ملف التصميم
         
