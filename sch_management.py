@@ -1578,6 +1578,7 @@ class Main(QtWidgets.QMainWindow):
             self.tableWidget_6.insertRow(row)
             course = score.course
             
+            
             # إنشاء العناصر مرة واحدة
             items = [
                 QtWidgets.QTableWidgetItem(course.course_code),
@@ -2230,24 +2231,22 @@ class Main(QtWidgets.QMainWindow):
             </div>
             
             <table>
-                <tr>
-                    <th>التقدير</th>
-                    <th>المعدل العام</th>
+                <tr>                    
+                    <th>الدرجة النهائية</th>
                     <th>درجة نهاية العام</th>
                     <th>درجة نصف العام</th>
                     <th>اسم الطالب</th>
-                    <th>الترتيب</th
+                    <th> رقم الطالب </th
                 </tr>
         """
         
         for row in range(self.tableWidget_13.rowCount()):
             html += f"""
-            <tr>
-                <td>{self.tableWidget_13.item(row, 6).text()}</td>
-                <td class="total">{self.tableWidget_13.item(row, 5).text()}</td>
-                <td>{self.tableWidget_13.item(row, 4).text()}</td>
+            <tr>                
+                <td class="total">{self.tableWidget_13.item(row, 4).text()}</td>
                 <td>{self.tableWidget_13.item(row, 3).text()}</td>
                 <td>{self.tableWidget_13.item(row, 2).text()}</td>
+                <td>{self.tableWidget_13.item(row, 1).text()}</td>
                 <td>{self.tableWidget_13.item(row, 0).text()}</td>
             </tr>
             """
